@@ -1,488 +1,364 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ขั้นตอนการทำงานและวิธีการใช้งาน หุ่นยนต์เคลื่อนที่</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <style>
-        /* 1. RESET & BASIC SETUP */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+<meta charset="UTF-8">
+<title>A5 Flyer - AGRI-BOT ESP32</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap');
 
-        body {
-            background-color: #cbd5e1;
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 24px;
-            margin: 0;
-            min-height: 100vh;
-            padding: 30px 0;
-            place-items: center;
-            font-family: 'Sarabun', sans-serif;
-        }
+  @page {
+    size: A5 portrait;
+    margin: 0;
+  }
 
-        .slide-container {
-            align-items: flex-start;
-            background-color: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 15px 30px rgba(15, 23, 42, 0.12);
-            display: flex;
-            flex-direction: column;
-            height: 720px;
-            justify-content: flex-start;
-            overflow: hidden;
-            padding: 50px 60px;
-            position: relative;
-            width: 1280px;
-        }
+  * {
+    box-sizing: border-box;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
 
-        /* Background decorative accent lines */
-        .slide-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 6px;
-            background: linear-gradient(90deg, #16a34a, #2563eb);
-            z-index: 10;
-        }
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Sarabun', sans-serif;
+    background-color: #f4f6f8;
+    color: #333;
+    font-size: 11pt;
+    line-height: 1.4;
+  }
 
-        /* 2. TYPOGRAPHY */
-        h1, h2, h3, .slide-title {
-            font-family: 'Prompt', sans-serif;
-            color: #0f172a;
-        }
+  .page {
+    width: 148mm;
+    height: 210mm;
+    padding: 12mm 10mm;
+    position: relative;
+    background-color: #ffffff;
+    overflow: hidden;
+    page-break-after: always;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
 
-        h1 {
-            font-size: 52px;
-            font-weight: 700;
-            line-height: 1.25;
-            margin-bottom: 16px;
-        }
+  /* Color Palette */
+  :root {
+    --primary: #1b5e20;
+    --primary-light: #4caf50;
+    --secondary: #0288d1;
+    --dark: #1e293b;
+    --accent: #f57c00;
+    --bg-light: #f1f8e9;
+  }
 
-        .slide-title {
-            font-size: 36px;
-            font-weight: 600;
-            margin-bottom: 30px;
-            color: #0f172a;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+  /* Header Section */
+  .header {
+    border-bottom: 3px solid var(--primary);
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+  }
 
-        .slide-title i {
-            color: #16a34a;
-            font-size: 32px;
-        }
+  .tagline {
+    background-color: var(--primary-light);
+    color: white;
+    font-size: 8pt;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+    display: inline-block;
+    text-transform: uppercase;
+  }
 
-        h3 {
-            font-size: 22px;
-            font-weight: 600;
-            margin-bottom: 12px;
-            color: #1e293b;
-        }
+  .title {
+    font-size: 18pt;
+    font-weight: 700;
+    color: var(--primary);
+    margin: 4px 0 2px 0;
+    line-height: 1.2;
+  }
 
-        p, li {
-            color: #475569;
-            font-size: 18px;
-            line-height: 1.6;
-        }
+  .subtitle {
+    font-size: 9.5pt;
+    color: #555;
+    font-weight: 400;
+  }
 
-        /* 3. CONTENT AREA LAYOUT */
-        .content-area {
-            align-items: center;
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1;
-            justify-content: center;
-            width: 100%;
-        }
+  /* Section Styling */
+  .section-title {
+    font-size: 11pt;
+    font-weight: 700;
+    color: var(--primary);
+    background: var(--bg-light);
+    padding: 4px 8px;
+    border-left: 4px solid var(--primary);
+    margin: 10px 0 6px 0;
+    border-radius: 0 4px 4px 0;
+  }
 
-        /* Slide 1: Title Layout */
-        .title-layout {
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            width: 100%;
-            background: radial-gradient(circle at center, #f0fdf4 0%, #ffffff 70%);
-            border-radius: 16px;
-            padding: 40px;
-        }
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
 
-        .title-badge {
-            background-color: #dcfce7;
-            color: #15803d;
-            font-family: 'Prompt', sans-serif;
-            font-size: 16px;
-            font-weight: 600;
-            padding: 8px 20px;
-            border-radius: 50px;
-            margin-bottom: 24px;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            border: 1px solid #bbf7d0;
-        }
+  .card {
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 8px;
+    background: #fafafa;
+  }
 
-        .subtitle {
-            font-size: 22px;
-            color: #475569;
-            max-width: 800px;
-            margin-top: 12px;
-        }
+  .card-title {
+    font-size: 9.5pt;
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
 
-        /* Slide 2: Workflow Steps */
-        .workflow-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            width: 100%;
-        }
+  .card-desc {
+    font-size: 8.5pt;
+    color: #64748b;
+  }
 
-        .step-card {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 24px 20px;
-            text-align: center;
-            position: relative;
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+  /* Table styling */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8.5pt;
+    margin-top: 4px;
+  }
 
-        .step-number {
-            background: linear-gradient(135deg, #16a34a, #2563eb);
-            color: #ffffff;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Prompt', sans-serif;
-            font-weight: 700;
-            font-size: 20px;
-            margin-bottom: 16px;
-        }
+  th, td {
+    border: 1px solid #cbd5e1;
+    padding: 5px 6px;
+    text-align: left;
+  }
 
-        .step-card i {
-            font-size: 32px;
-            color: #2563eb;
-            margin-bottom: 16px;
-        }
+  th {
+    background-color: var(--primary);
+    color: white;
+    font-weight: 600;
+  }
 
-        .step-card h3 {
-            font-size: 18px;
-            margin-bottom: 8px;
-        }
+  /* Flowchart Horizontal */
+  .flowchart {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 6px;
+    font-size: 8pt;
+  }
 
-        .step-card p {
-            font-size: 15px;
-            color: #64748b;
-        }
+  .flow-step {
+    background: #fff;
+    border: 1px solid var(--primary-light);
+    border-radius: 4px;
+    padding: 4px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 
-        /* Slide 3: Two Column Image + List */
-        .two-column {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            width: 100%;
-            align-items: center;
-        }
+  .flow-arrow {
+    text-align: center;
+    color: var(--primary);
+    font-weight: bold;
+    font-size: 8pt;
+    margin: -2px 0;
+  }
 
-        .components-list {
-            list-style: none;
-        }
+  .badge {
+    background: var(--primary);
+    color: white;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 7.5pt;
+  }
 
-        .components-list li {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-left: 4px solid #16a34a;
-            border-radius: 8px;
-            padding: 12px 18px;
-            margin-bottom: 10px;
-            font-size: 17px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
+  /* Footer */
+  .footer {
+    border-top: 1px solid #e2e8f0;
+    padding-top: 6px;
+    font-size: 8pt;
+    color: #64748b;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 
-        .components-list li i {
-            color: #16a34a;
-            font-size: 20px;
-            width: 24px;
-            text-align: center;
-        }
+  /* Roadmap styling for Page 2 */
+  .roadmap-item {
+    position: relative;
+    padding-left: 16px;
+    margin-bottom: 8px;
+    border-left: 2px solid var(--secondary);
+  }
 
-        .image-wrapper {
-            border-radius: 12px;
-            overflow: hidden;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.06);
-            height: 380px;
-            width: 100%;
-        }
+  .roadmap-title {
+    font-size: 9.5pt;
+    font-weight: 700;
+    color: var(--secondary);
+  }
 
-        .image-wrapper img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+  .roadmap-desc {
+    font-size: 8.5pt;
+    color: #475569;
+  }
 
-        /* Slide 4: Tiled Comparison */
-        .two-column-tiled {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            width: 100%;
-        }
-
-        .tile-box {
-            border-radius: 12px;
-            padding: 28px;
-        }
-
-        .tile-pros {
-            background-color: #f0fdf4;
-            border: 1px solid #bbf7d0;
-        }
-
-        .tile-cons {
-            background-color: #fef2f2;
-            border: 1px solid #fecaca;
-        }
-
-        .tile-box h3 {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 16px;
-        }
-
-        .tile-pros h3 {
-            color: #15803d;
-        }
-
-        .tile-cons h3 {
-            color: #dc2626;
-        }
-
-        .tile-box ul {
-            list-style: none;
-        }
-
-        .tile-box li {
-            margin-bottom: 12px;
-            position: relative;
-            padding-left: 28px;
-            font-size: 17px;
-        }
-
-        .tile-pros li::before {
-            content: "\f00c";
-            font-family: "Font Awesome 6 Free";
-            font-weight: 900;
-            color: #16a34a;
-            position: absolute;
-            left: 0;
-            top: 0;
-        }
-
-        .tile-cons li::before {
-            content: "\f06a";
-            font-family: "Font Awesome 6 Free";
-            font-weight: 900;
-            color: #dc2626;
-            position: absolute;
-            left: 0;
-            top: 0;
-        }
-
-        /* Slide 5: Bleed Image Right */
-        .slide-container.bleed-image-layout {
-            align-items: start;
-            display: grid;
-            gap: 50px;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            padding: 0;
-        }
-
-        .slide-container.bleed-image-layout > .content-container {
-            padding: 50px 0 50px 60px;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            justify-content: center;
-        }
-
-        .slide-container.bleed-image-layout > .image-container {
-            height: 100%;
-            overflow: hidden;
-            width: 100%;
-        }
-
-        .slide-container.bleed-image-layout img.bleed-image-side {
-            border-radius: 0 12px 12px 0;
-            display: block;
-            height: 720px;
-            object-fit: cover;
-            width: 100%;
-        }
-
-        .future-item {
-            background: #f8fafc;
-            border-left: 4px solid #2563eb;
-            border-radius: 6px;
-            padding: 16px;
-            margin-bottom: 16px;
-        }
-
-        .future-item h3 {
-            color: #2563eb;
-            font-size: 19px;
-            margin-bottom: 4px;
-        }
-
-        .future-item p {
-            font-size: 16px;
-            color: #475569;
-        }
-
-    </style>
+  .quote-box {
+    background-color: #fff3e0;
+    border-left: 4px solid var(--accent);
+    padding: 8px;
+    border-radius: 0 6px 6px 0;
+    font-size: 8.5pt;
+    font-style: italic;
+    color: #e65100;
+    margin-top: 8px;
+  }
+</style>
 </head>
 <body>
 
-    <!-- Slide 1: Title Slide -->
-    <!-- HTML Comment: Slide 1 - Title_Slide Layout -->
-    <div class="slide-container" id="slide1">
-        <div class="title-layout">
-            <div class="title-badge">
-                <i class="fa-solid fa-robot"></i> นวัตกรรมหุ่นยนต์เพื่อการเกษตร
-            </div>
-            <h1>หุ่นยนต์เคลื่อนที่พ่นสารเคมี</h1>
-            <p class="subtitle">ขั้นตอนการทำงาน วิธีการใช้งาน ส่วนประกอบ ประสิทธิภาพ และแนวทางในการพัฒนาต่อในอนาคต</p>
+  <!-- ================= PAGE 1: FRONT ================= -->
+  <div class="page">
+    <div>
+      <div class="header">
+        <span class="tagline">INNOVATION PROTOTYPE</span>
+        <div class="title">AGRI-BOT ESP32</div>
+        <div class="subtitle">หุ่นยนต์พ่นสารเคมีเกษตรอัจฉริยะ ควบคุมไร้สายผ่าน Wi-Fi</div>
+      </div>
+
+      <div class="section-title">1. ภาพรวมชิ้นงาน (Product Overview)</div>
+      <p style="font-size: 8.5pt; margin: 4px 0 8px 0; color: #334155;">
+        ต้นแบบหุ่นยนต์ขนาดเล็กขับเคลื่อน 4 ล้อ ออกแบบมาเพื่อสาธิตระบบฉีดพ่นละอองสารเคมีจำลองในแปลงเกษตร ควบคุมผ่านสมาร์ตโฟน ช่วยลดการสัมผัสสารเคมีอันตรายของเกษตรกร 100%
+      </p>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">📶 Wi-Fi Web Server</div>
+          <div class="card-desc">ปล่อยสัญญาณ AP ไม่ต้องใช้อินเทอร์เน็ต สั่งงานผ่านหน้าเว็บมือถือทันที</div>
         </div>
+        <div class="card">
+          <div class="card-title">🕹️ Differential Drive</div>
+          <div class="card-desc">บังคับทิศทางอิสระ เดินหน้า ถอยหลัง เลี้ยวซ้าย-ขวาได้อย่างแม่นยำ</div>
+        </div>
+        <div class="card">
+          <div class="card-title">💦 Smart Spraying</div>
+          <div class="card-desc">ควบคุมปั๊มและหัวพ่นหมอกผ่าน Solid-State Relay ฉีดพ่นละอองละเอียด</div>
+        </div>
+        <div class="card">
+          <div class="card-title">⚡ Safe Power System</div>
+          <div class="card-desc">จ่ายไฟแยกส่วนด้วย Buck Converter ป้องกันบอร์ดรีเซ็ตความปลอดภัยสูง</div>
+        </div>
+      </div>
+
+      <div class="section-title">2. ขั้นตอนการทำงาน (System Flowchart)</div>
+      <div class="flowchart">
+        <div class="flow-step">
+          <span><b>1. Start:</b> เปิดสวิตช์ไฟหลัก</span>
+          <span class="badge">Power ON</span>
+        </div>
+        <div class="flow-arrow">▼</div>
+        <div class="flow-step">
+          <span><b>2. Setup:</b> ESP32 กระจาย Wi-Fi AP & Ready</span>
+          <span class="badge">Wi-Fi Ready</span>
+        </div>
+        <div class="flow-arrow">▼</div>
+        <div class="flow-step">
+          <span><b>3. Decision:</b> ตรวจรับคำสั่งกดปุ่มจากมือถือ</span>
+          <span class="badge">Control UI</span>
+        </div>
+        <div class="flow-arrow">▼</div>
+        <div class="flow-step" style="background: #f8fafc;">
+          <span>• ปุ่มทิศทาง ➔ <b>มอเตอร์หมุน</b><br>• ปุ่มพ่นยา ➔ <b>ปั๊มทำงาน</b><br>• ปล่อยปุ่ม ➔ <b>หยุดนิ่ง</b></span>
+          <span class="badge" style="background: var(--accent);">Action</span>
+        </div>
+        <div class="flow-arrow">▼</div>
+        <div class="flow-step">
+          <span><b>4. End:</b> ปิดสวิตช์ไฟ ตัดระบบทั้งหมด</span>
+          <span class="badge" style="background: #64748b;">Power OFF</span>
+        </div>
+      </div>
     </div>
 
-    <!-- Slide 2: Workflow & Operating Steps -->
-    <!-- HTML Comment: Slide 2 - Timeline / Step Process Layout -->
-    <div class="slide-container" id="slide2">
-        <h2 class="slide-title"><i class="fa-solid fa-gears"></i> ขั้นตอนการทำงานและวิธีการใช้งาน</h2>
-        <div class="content-area">
-            <div class="workflow-grid">
-                <div class="step-card">
-                    <div class="step-number">1</div>
-                    <i class="fa-solid fa-power-off"></i>
-                    <h3>เปิดสวิตช์ใช้งาน</h3>
-                    <p>เปิดสวิตช์เพื่อเริ่มต้นการทำงานของระบบหุ่นยนต์</p>
-                </div>
-                <div class="step-card">
-                    <div class="step-number">2</div>
-                    <i class="fa-solid fa-wifi"></i>
-                    <h3>ปล่อยสัญญาณ Wi-Fi</h3>
-                    <p>บอร์ด ESP32 ทำการปล่อยสัญญาณ Wi-Fi อัตโนมัติ</p>
-                </div>
-                <div class="step-card">
-                    <div class="step-number">3</div>
-                    <i class="fa-solid fa-mobile-screen-button"></i>
-                    <h3>เชื่อมต่อสมาร์ทโฟน</h3>
-                    <p>ใช้สมาร์ทโฟนเชื่อมต่อเข้ากับ Wi-Fi ของ ESP32</p>
-                </div>
-                <div class="step-card">
-                    <div class="step-number">4</div>
-                    <i class="fa-solid fa-gamepad"></i>
-                    <h3>บังคับและพ่นยา</h3>
-                    <p>กดปุ่มบังคับทิศทางและสั่งงานพ่นยา เมื่อเสร็จให้ปิดสวิตช์</p>
-                </div>
-            </div>
+    <div class="footer">
+      <span>หน้า 1 / 2 (ด้านหน้า)</span>
+      <span>AGRI-BOT PROTOTYPE A5 FLYER</span>
+    </div>
+  </div>
+
+  <!-- ================= PAGE 2: BACK ================= -->
+  <div class="page">
+    <div>
+      <div class="header" style="border-color: var(--secondary);">
+        <span class="tagline" style="background-color: var(--secondary);">VISIONARY ROADMAP</span>
+        <div class="title" style="color: var(--secondary);">FUTURE OF AGRI-TECH</div>
+        <div class="subtitle">การต่อยอดสู่แพลตฟอร์มหุ่นยนต์เกษตรไร้คนขับ 100%</div>
+      </div>
+
+      <div class="section-title" style="border-color: var(--secondary); background: #e0f2fe;">1. อุปกรณ์หลักในชิ้นงาน (Hardware Stack)</div>
+      <table>
+        <thead>
+          <tr>
+            <th>อุปกรณ์</th>
+            <th>หน้าที่การทำงาน</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>ESP32 Dev Board</b></td>
+            <td>ประมวลผลหลัก และสร้าง Web Server ไร้สาย</td>
+          </tr>
+          <tr>
+            <td><b>L298N Driver</b></td>
+            <td>ควบคุมการหมุนและทิศทางของมอเตอร์ล้อทั้ง 4 ตัว</td>
+          </tr>
+          <tr>
+            <td><b>Relay Module</b></td>
+            <td>สวิตช์อิเล็กทรอนิกส์ ตัด-ต่อ ไฟจ่ายให้ปั๊มพ่นน้ำ</td>
+          </tr>
+          <tr>
+            <td><b>Mini Pump & Nozzle</b></td>
+            <td>ปั๊มสูบน้ำและหัวฉีดละอองหมอกจำลองการพ่นยา</td>
+          </tr>
+          <tr>
+            <td><b>Li-ion 18650 & Buck</b></td>
+            <td>แหล่งพลังงาน 7.4V และวงจรแปลงไฟเลี้ยงบอร์ด 5V</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="section-title" style="border-color: var(--secondary); background: #e0f2fe;">2. แผนพัฒนาต่อยอดอนาคต (Roadmap)</div>
+      
+      <div style="margin-top: 8px;">
+        <div class="roadmap-item">
+          <div class="roadmap-title">🌱 Phase 1: AI Precision Spraying</div>
+          <div class="roadmap-desc">ติดตั้งกล้อง AI ตรวจจับโรคพืชเฉพาะจุด สั่งพ่นยาเฉพาะใบที่มีปัญหา ลดการใช้สารเคมีลง 80-90%</div>
         </div>
+
+        <div class="roadmap-item">
+          <div class="roadmap-title">🤖 Phase 2: Swarm Autonomous Fleet</div>
+          <div class="roadmap-desc">ขยายสเกลสู่ฝูงหุ่นยนต์พ่นยาไร้คนขับ สั่งการผ่าน RTK-GPS ความแม่นยำระดับเซนติเมตร</div>
+        </div>
+
+        <div class="roadmap-item" style="border-color: var(--accent);">
+          <div class="roadmap-title" style="color: var(--accent);">⚡ Phase 3: Auto-Docking & Green Energy</div>
+          <div class="roadmap-desc">สถานีชาร์จไฟโซลาร์เซลล์และเติมยาอัตโนมัติ 24 ชม. พร้อมวัดผล Carbon Credits ขายในตลาดโลก</div>
+        </div>
+      </div>
+
+      <div class="quote-box">
+        "ชิ้นงานนี้ไม่ใช่แค่รถบังคับพ่นยา แต่คือ <b>พิมพ์เขียวทางเทคโนโลยี (Technological Blueprint)</b> แรกของระบบนิเวศการเกษตรแห่งอนาคต"
+      </div>
     </div>
 
-    <!-- Slide 3: Robot Components -->
-    <!-- HTML Comment: Slide 3 - Image_Right_Text_Left Layout -->
-    <div class="slide-container" id="slide3">
-        <h2 class="slide-title"><i class="fa-solid fa-microchip"></i> ส่วนประกอบหลักของหุ่นยนต์</h2>
-        <div class="content-area">
-            <div class="two-column">
-                <ul class="components-list">
-                    <li><i class="fa-solid fa-memory"></i> <strong>บอร์ด ESP32:</strong> ประมวลผลและส่งสัญญาณ Wi-Fi</li>
-                    <li><i class="fa-solid fa-circuit-board"></i> <strong>บอร์ดไดรฟ์มอเตอร์ L298N:</strong> ควบคุมมอเตอร์</li>
-                    <li><i class="fa-solid fa-car-battery"></i> <strong>โมดูล Step Down:</strong> ปรับระดับแรงดันไฟฟ้า</li>
-                    <li><i class="fa-solid fa-dharmachakra"></i> <strong>มอเตอร์ DC และล้อ:</strong> ขับเคลื่อนทิศทาง</li>
-                    <li><i class="fa-solid fa-plug"></i> <strong>สายไฟผู้-เมีย:</strong> เชื่อมต่อวงจรและส่วนต่างๆ</li>
-                </ul>
-                <div class="image-wrapper">
-                    <img src="http://googleusercontent.com/image_collection/image_retrieval/3267624345412097517_0" alt="ส่วนประกอบหุ่นยนต์ ESP32">
-                </div>
-            </div>
-        </div>
+    <div class="footer">
+      <span>หน้า 2 / 2 (ด้านหลัง)</span>
+      <span>ติดต่อ / Scan QR Code ดูสาธิตการทำงาน</span>
     </div>
-
-    <!-- Slide 4: Performance & Comparison -->
-    <!-- HTML Comment: Slide 4 - Two_Column_Tiled_Text Layout -->
-    <div class="slide-container" id="slide4">
-        <h2 class="slide-title"><i class="fa-solid fa-chart-pie"></i> ประสิทธิภาพ ข้อดี และข้อจำกัด</h2>
-        <div class="content-area">
-            <div class="two-column-tiled">
-                <div class="tile-box tile-pros">
-                    <h3><i class="fa-solid fa-circle-check"></i> ข้อดีและประสิทธิภาพ</h3>
-                    <ul>
-                        <li>ลดการสัมผัสสารเคมีโดยตรง ปลอดภัย ลดการเสียชีวิต</li>
-                        <li>เพิ่มความแม่นยำในการพ่นสารเคมีเข้าสู่เป้าหมาย</li>
-                        <li>ลดการใช้แรงงานคนในการเดินพ่นสารเคมีในแปลง</li>
-                    </ul>
-                </div>
-                <div class="tile-box tile-cons">
-                    <h3><i class="fa-solid fa-triangle-exclamation"></i> ข้อจำกัดและผลกระทบ</h3>
-                    <ul>
-                        <li>ยังต้องใช้แรงงานคนในการเติมสารเคมีลงในถัง</li>
-                        <li>แรงงานคนในภาคสนามถูกทดแทนด้วยระบบหุ่นยนต์</li>
-                        <li>ไม่สามารถแก้ไขปัญหาละเอียดอ่อนได้ เช่น การหลุดติดร่องดิน</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Slide 5: Future Development -->
-    <!-- HTML Comment: Slide 5 - Bleed_Image_Right Layout -->
-    <div class="slide-container bleed-image-layout" id="slide5">
-        <div class="content-container">
-            <h2 class="slide-title" style="margin-bottom: 20px;"><i class="fa-solid fa-rocket"></i> แนวทางพัฒนาในอนาคต</h2>
-            <div class="future-item">
-                <h3>1. แอปพลิเคชันเฉพาะทาง</h3>
-                <p>พัฒนาจากการควบคุมผ่านเว็บไซต์ เป็นการสั่งงานผ่านแอปพลิเคชันมือถือเฉพาะทาง</p>
-            </div>
-            <div class="future-item">
-                <h3>2. ชุดหัวพ่นอัจฉริยะ</h3>
-                <p>พัฒนาชุดหัวพ่นสารเคมีให้สามารถปรับระดับความสูงและทิศทางได้ตามขนาดพืช</p>
-            </div>
-            <div class="future-item">
-                <h3>3. ระบบอัตโนมัติ (Autonomous)</h3>
-                <p>พัฒนาจากหุ่นยนต์บังคับมือสู่หุ่นยนต์อัตโนมัติ พร้อมระบบวางแผนเส้นทางเดิน</p>
-            </div>
-        </div>
-        <div class="image-container">
-            <img class="bleed-image-side" src="http://googleusercontent.com/image_collection/image_retrieval/14022828503874535785_0" alt="หุ่นยนต์การเกษตรอัจฉริยะ">
-        </div>
-    </div>
+  </div>
 
 </body>
 </html>
-```eof
-
-สไลด์นำเสนอเรื่อง **ขั้นตอนการทำงานและวิธีการใช้งาน หุ่นยนต์เคลื่อนที่พ่นสารเคมี** จำนวน 5 หน้าพร้อมใช้งานแล้วครับ คุณสามารถตรวจสอบและแจ้งหากต้องการปรับแต่งส่วนใดเพิ่มเติมได้เลยครับ
