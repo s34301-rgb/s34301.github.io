@@ -1,1 +1,488 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ขั้นตอนการทำงานและวิธีการใช้งาน หุ่นยนต์เคลื่อนที่</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* 1. RESET & BASIC SETUP */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
+        body {
+            background-color: #cbd5e1;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+            margin: 0;
+            min-height: 100vh;
+            padding: 30px 0;
+            place-items: center;
+            font-family: 'Sarabun', sans-serif;
+        }
+
+        .slide-container {
+            align-items: flex-start;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 15px 30px rgba(15, 23, 42, 0.12);
+            display: flex;
+            flex-direction: column;
+            height: 720px;
+            justify-content: flex-start;
+            overflow: hidden;
+            padding: 50px 60px;
+            position: relative;
+            width: 1280px;
+        }
+
+        /* Background decorative accent lines */
+        .slide-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, #16a34a, #2563eb);
+            z-index: 10;
+        }
+
+        /* 2. TYPOGRAPHY */
+        h1, h2, h3, .slide-title {
+            font-family: 'Prompt', sans-serif;
+            color: #0f172a;
+        }
+
+        h1 {
+            font-size: 52px;
+            font-weight: 700;
+            line-height: 1.25;
+            margin-bottom: 16px;
+        }
+
+        .slide-title {
+            font-size: 36px;
+            font-weight: 600;
+            margin-bottom: 30px;
+            color: #0f172a;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .slide-title i {
+            color: #16a34a;
+            font-size: 32px;
+        }
+
+        h3 {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #1e293b;
+        }
+
+        p, li {
+            color: #475569;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+
+        /* 3. CONTENT AREA LAYOUT */
+        .content-area {
+            align-items: center;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            justify-content: center;
+            width: 100%;
+        }
+
+        /* Slide 1: Title Layout */
+        .title-layout {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            width: 100%;
+            background: radial-gradient(circle at center, #f0fdf4 0%, #ffffff 70%);
+            border-radius: 16px;
+            padding: 40px;
+        }
+
+        .title-badge {
+            background-color: #dcfce7;
+            color: #15803d;
+            font-family: 'Prompt', sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            padding: 8px 20px;
+            border-radius: 50px;
+            margin-bottom: 24px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #bbf7d0;
+        }
+
+        .subtitle {
+            font-size: 22px;
+            color: #475569;
+            max-width: 800px;
+            margin-top: 12px;
+        }
+
+        /* Slide 2: Workflow Steps */
+        .workflow-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            width: 100%;
+        }
+
+        .step-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 24px 20px;
+            text-align: center;
+            position: relative;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .step-number {
+            background: linear-gradient(135deg, #16a34a, #2563eb);
+            color: #ffffff;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Prompt', sans-serif;
+            font-weight: 700;
+            font-size: 20px;
+            margin-bottom: 16px;
+        }
+
+        .step-card i {
+            font-size: 32px;
+            color: #2563eb;
+            margin-bottom: 16px;
+        }
+
+        .step-card h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .step-card p {
+            font-size: 15px;
+            color: #64748b;
+        }
+
+        /* Slide 3: Two Column Image + List */
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            width: 100%;
+            align-items: center;
+        }
+
+        .components-list {
+            list-style: none;
+        }
+
+        .components-list li {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-left: 4px solid #16a34a;
+            border-radius: 8px;
+            padding: 12px 18px;
+            margin-bottom: 10px;
+            font-size: 17px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .components-list li i {
+            color: #16a34a;
+            font-size: 20px;
+            width: 24px;
+            text-align: center;
+        }
+
+        .image-wrapper {
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.06);
+            height: 380px;
+            width: 100%;
+        }
+
+        .image-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Slide 4: Tiled Comparison */
+        .two-column-tiled {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            width: 100%;
+        }
+
+        .tile-box {
+            border-radius: 12px;
+            padding: 28px;
+        }
+
+        .tile-pros {
+            background-color: #f0fdf4;
+            border: 1px solid #bbf7d0;
+        }
+
+        .tile-cons {
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+        }
+
+        .tile-box h3 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .tile-pros h3 {
+            color: #15803d;
+        }
+
+        .tile-cons h3 {
+            color: #dc2626;
+        }
+
+        .tile-box ul {
+            list-style: none;
+        }
+
+        .tile-box li {
+            margin-bottom: 12px;
+            position: relative;
+            padding-left: 28px;
+            font-size: 17px;
+        }
+
+        .tile-pros li::before {
+            content: "\f00c";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            color: #16a34a;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        .tile-cons li::before {
+            content: "\f06a";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            color: #dc2626;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        /* Slide 5: Bleed Image Right */
+        .slide-container.bleed-image-layout {
+            align-items: start;
+            display: grid;
+            gap: 50px;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            padding: 0;
+        }
+
+        .slide-container.bleed-image-layout > .content-container {
+            padding: 50px 0 50px 60px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            justify-content: center;
+        }
+
+        .slide-container.bleed-image-layout > .image-container {
+            height: 100%;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .slide-container.bleed-image-layout img.bleed-image-side {
+            border-radius: 0 12px 12px 0;
+            display: block;
+            height: 720px;
+            object-fit: cover;
+            width: 100%;
+        }
+
+        .future-item {
+            background: #f8fafc;
+            border-left: 4px solid #2563eb;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .future-item h3 {
+            color: #2563eb;
+            font-size: 19px;
+            margin-bottom: 4px;
+        }
+
+        .future-item p {
+            font-size: 16px;
+            color: #475569;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Slide 1: Title Slide -->
+    <!-- HTML Comment: Slide 1 - Title_Slide Layout -->
+    <div class="slide-container" id="slide1">
+        <div class="title-layout">
+            <div class="title-badge">
+                <i class="fa-solid fa-robot"></i> นวัตกรรมหุ่นยนต์เพื่อการเกษตร
+            </div>
+            <h1>หุ่นยนต์เคลื่อนที่พ่นสารเคมี</h1>
+            <p class="subtitle">ขั้นตอนการทำงาน วิธีการใช้งาน ส่วนประกอบ ประสิทธิภาพ และแนวทางในการพัฒนาต่อในอนาคต</p>
+        </div>
+    </div>
+
+    <!-- Slide 2: Workflow & Operating Steps -->
+    <!-- HTML Comment: Slide 2 - Timeline / Step Process Layout -->
+    <div class="slide-container" id="slide2">
+        <h2 class="slide-title"><i class="fa-solid fa-gears"></i> ขั้นตอนการทำงานและวิธีการใช้งาน</h2>
+        <div class="content-area">
+            <div class="workflow-grid">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <i class="fa-solid fa-power-off"></i>
+                    <h3>เปิดสวิตช์ใช้งาน</h3>
+                    <p>เปิดสวิตช์เพื่อเริ่มต้นการทำงานของระบบหุ่นยนต์</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <i class="fa-solid fa-wifi"></i>
+                    <h3>ปล่อยสัญญาณ Wi-Fi</h3>
+                    <p>บอร์ด ESP32 ทำการปล่อยสัญญาณ Wi-Fi อัตโนมัติ</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <i class="fa-solid fa-mobile-screen-button"></i>
+                    <h3>เชื่อมต่อสมาร์ทโฟน</h3>
+                    <p>ใช้สมาร์ทโฟนเชื่อมต่อเข้ากับ Wi-Fi ของ ESP32</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">4</div>
+                    <i class="fa-solid fa-gamepad"></i>
+                    <h3>บังคับและพ่นยา</h3>
+                    <p>กดปุ่มบังคับทิศทางและสั่งงานพ่นยา เมื่อเสร็จให้ปิดสวิตช์</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3: Robot Components -->
+    <!-- HTML Comment: Slide 3 - Image_Right_Text_Left Layout -->
+    <div class="slide-container" id="slide3">
+        <h2 class="slide-title"><i class="fa-solid fa-microchip"></i> ส่วนประกอบหลักของหุ่นยนต์</h2>
+        <div class="content-area">
+            <div class="two-column">
+                <ul class="components-list">
+                    <li><i class="fa-solid fa-memory"></i> <strong>บอร์ด ESP32:</strong> ประมวลผลและส่งสัญญาณ Wi-Fi</li>
+                    <li><i class="fa-solid fa-circuit-board"></i> <strong>บอร์ดไดรฟ์มอเตอร์ L298N:</strong> ควบคุมมอเตอร์</li>
+                    <li><i class="fa-solid fa-car-battery"></i> <strong>โมดูล Step Down:</strong> ปรับระดับแรงดันไฟฟ้า</li>
+                    <li><i class="fa-solid fa-dharmachakra"></i> <strong>มอเตอร์ DC และล้อ:</strong> ขับเคลื่อนทิศทาง</li>
+                    <li><i class="fa-solid fa-plug"></i> <strong>สายไฟผู้-เมีย:</strong> เชื่อมต่อวงจรและส่วนต่างๆ</li>
+                </ul>
+                <div class="image-wrapper">
+                    <img src="http://googleusercontent.com/image_collection/image_retrieval/3267624345412097517_0" alt="ส่วนประกอบหุ่นยนต์ ESP32">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4: Performance & Comparison -->
+    <!-- HTML Comment: Slide 4 - Two_Column_Tiled_Text Layout -->
+    <div class="slide-container" id="slide4">
+        <h2 class="slide-title"><i class="fa-solid fa-chart-pie"></i> ประสิทธิภาพ ข้อดี และข้อจำกัด</h2>
+        <div class="content-area">
+            <div class="two-column-tiled">
+                <div class="tile-box tile-pros">
+                    <h3><i class="fa-solid fa-circle-check"></i> ข้อดีและประสิทธิภาพ</h3>
+                    <ul>
+                        <li>ลดการสัมผัสสารเคมีโดยตรง ปลอดภัย ลดการเสียชีวิต</li>
+                        <li>เพิ่มความแม่นยำในการพ่นสารเคมีเข้าสู่เป้าหมาย</li>
+                        <li>ลดการใช้แรงงานคนในการเดินพ่นสารเคมีในแปลง</li>
+                    </ul>
+                </div>
+                <div class="tile-box tile-cons">
+                    <h3><i class="fa-solid fa-triangle-exclamation"></i> ข้อจำกัดและผลกระทบ</h3>
+                    <ul>
+                        <li>ยังต้องใช้แรงงานคนในการเติมสารเคมีลงในถัง</li>
+                        <li>แรงงานคนในภาคสนามถูกทดแทนด้วยระบบหุ่นยนต์</li>
+                        <li>ไม่สามารถแก้ไขปัญหาละเอียดอ่อนได้ เช่น การหลุดติดร่องดิน</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: Future Development -->
+    <!-- HTML Comment: Slide 5 - Bleed_Image_Right Layout -->
+    <div class="slide-container bleed-image-layout" id="slide5">
+        <div class="content-container">
+            <h2 class="slide-title" style="margin-bottom: 20px;"><i class="fa-solid fa-rocket"></i> แนวทางพัฒนาในอนาคต</h2>
+            <div class="future-item">
+                <h3>1. แอปพลิเคชันเฉพาะทาง</h3>
+                <p>พัฒนาจากการควบคุมผ่านเว็บไซต์ เป็นการสั่งงานผ่านแอปพลิเคชันมือถือเฉพาะทาง</p>
+            </div>
+            <div class="future-item">
+                <h3>2. ชุดหัวพ่นอัจฉริยะ</h3>
+                <p>พัฒนาชุดหัวพ่นสารเคมีให้สามารถปรับระดับความสูงและทิศทางได้ตามขนาดพืช</p>
+            </div>
+            <div class="future-item">
+                <h3>3. ระบบอัตโนมัติ (Autonomous)</h3>
+                <p>พัฒนาจากหุ่นยนต์บังคับมือสู่หุ่นยนต์อัตโนมัติ พร้อมระบบวางแผนเส้นทางเดิน</p>
+            </div>
+        </div>
+        <div class="image-container">
+            <img class="bleed-image-side" src="http://googleusercontent.com/image_collection/image_retrieval/14022828503874535785_0" alt="หุ่นยนต์การเกษตรอัจฉริยะ">
+        </div>
+    </div>
+
+</body>
+</html>
+```eof
+
+สไลด์นำเสนอเรื่อง **ขั้นตอนการทำงานและวิธีการใช้งาน หุ่นยนต์เคลื่อนที่พ่นสารเคมี** จำนวน 5 หน้าพร้อมใช้งานแล้วครับ คุณสามารถตรวจสอบและแจ้งหากต้องการปรับแต่งส่วนใดเพิ่มเติมได้เลยครับ
