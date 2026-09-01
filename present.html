@@ -2,9 +2,9 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>A5 Flyer - AGRI-BOT ESP32</title>
+<title>Executive A5 Flyer - AGRI-BOT ESP32</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,300;0,400;0,600;0,700;1,300&family=Montserrat:wght@400;600;800&display=swap');
 
   @page {
     size: A5 portrait;
@@ -20,10 +20,10 @@
   body {
     margin: 0;
     padding: 0;
-    font-family: 'Sarabun', sans-serif;
-    background-color: #f4f6f8;
-    color: #333;
-    font-size: 11pt;
+    font-family: 'Kanit', sans-serif;
+    background-color: #0b0f19;
+    color: #f1f5f9;
+    font-size: 10pt;
     line-height: 1.4;
   }
 
@@ -32,66 +32,82 @@
     height: 210mm;
     padding: 12mm 10mm;
     position: relative;
-    background-color: #ffffff;
+    background: radial-gradient(circle at top right, #112217, #0b0f19 70%);
     overflow: hidden;
     page-break-after: always;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    border: 1px solid #1e293b;
   }
 
-  /* Color Palette */
+  /* Executive Luxury Color Palette */
   :root {
-    --primary: #1b5e20;
-    --primary-light: #4caf50;
-    --secondary: #0288d1;
-    --dark: #1e293b;
-    --accent: #f57c00;
-    --bg-light: #f1f8e9;
+    --gold: #f59e0b;
+    --gold-glow: #d97706;
+    --emerald: #10b981;
+    --emerald-light: #34d399;
+    --cyan: #06b6d4;
+    --dark-card: rgba(15, 23, 42, 0.75);
+    --border-card: rgba(51, 65, 85, 0.8);
+    --text-muted: #94a3b8;
   }
 
-  /* Header Section */
-  .header {
-    border-bottom: 3px solid var(--primary);
-    padding-bottom: 8px;
-    margin-bottom: 10px;
+  /* Glow Elements & Accents */
+  .glow-bar {
+    height: 3px;
+    width: 100%;
+    background: linear-gradient(90deg, var(--emerald) 0%, var(--cyan) 50%, var(--gold) 100%);
+    border-radius: 2px;
+    margin-bottom: 8px;
   }
 
-  .tagline {
-    background-color: var(--primary-light);
-    color: white;
-    font-size: 8pt;
-    font-weight: 600;
+  .badge-vip {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.1));
+    border: 1px solid var(--gold);
+    color: #fbbf24;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 6.5pt;
+    font-weight: 800;
+    letter-spacing: 1.5px;
     padding: 2px 8px;
-    border-radius: 10px;
+    border-radius: 20px;
     display: inline-block;
     text-transform: uppercase;
+    margin-bottom: 4px;
   }
 
-  .title {
-    font-size: 18pt;
+  .title-executive {
+    font-size: 20pt;
     font-weight: 700;
-    color: var(--primary);
-    margin: 4px 0 2px 0;
-    line-height: 1.2;
+    line-height: 1.1;
+    background: linear-gradient(135deg, #ffffff 30%, var(--emerald-light) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 2px 0 4px 0;
   }
 
-  .subtitle {
-    font-size: 9.5pt;
-    color: #555;
-    font-weight: 400;
+  .subtitle-executive {
+    font-size: 8.5pt;
+    color: var(--text-muted);
+    font-weight: 300;
+    letter-spacing: 0.3px;
   }
 
-  /* Section Styling */
-  .section-title {
-    font-size: 11pt;
-    font-weight: 700;
-    color: var(--primary);
-    background: var(--bg-light);
-    padding: 4px 8px;
-    border-left: 4px solid var(--primary);
+  /* Glassmorphism Section Cards */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     margin: 10px 0 6px 0;
-    border-radius: 0 4px 4px 0;
+  }
+
+  .section-title {
+    font-size: 10.5pt;
+    font-weight: 600;
+    color: var(--emerald-light);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
   }
 
   .grid-2 {
@@ -100,263 +116,284 @@
     gap: 8px;
   }
 
-  .card {
-    border: 1px solid #e2e8f0;
-    border-radius: 6px;
-    padding: 8px;
-    background: #fafafa;
+  .glass-card {
+    background: var(--dark-card);
+    border: 1px solid var(--border-card);
+    backdrop-filter: blur(10px);
+    border-radius: 8px;
+    padding: 8px 10px;
+    position: relative;
+  }
+
+  .glass-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: var(--emerald);
+    border-radius: 8px 0 0 8px;
   }
 
   .card-title {
-    font-size: 9.5pt;
+    font-size: 9pt;
     font-weight: 600;
-    color: var(--dark);
-    margin-bottom: 3px;
+    color: #ffffff;
+    margin-bottom: 2px;
     display: flex;
     align-items: center;
-    gap: 4px;
+    justify-content: space-between;
   }
 
   .card-desc {
-    font-size: 8.5pt;
-    color: #64748b;
+    font-size: 7.5pt;
+    color: var(--text-muted);
+    font-weight: 300;
+    line-height: 1.3;
   }
 
-  /* Table styling */
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 8.5pt;
-    margin-top: 4px;
-  }
-
-  th, td {
-    border: 1px solid #cbd5e1;
-    padding: 5px 6px;
-    text-align: left;
-  }
-
-  th {
-    background-color: var(--primary);
-    color: white;
-    font-weight: 600;
-  }
-
-  /* Flowchart Horizontal */
-  .flowchart {
+  /* Executive ROI Table */
+  .metrics-container {
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
+    background: rgba(16, 185, 129, 0.05);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 8px;
+    padding: 8px;
+    margin-top: 6px;
+  }
+
+  .metric-box {
+    text-align: center;
+    flex: 1;
+  }
+
+  .metric-box:not(:last-child) {
+    border-right: 1px solid var(--border-card);
+  }
+
+  .metric-value {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12pt;
+    font-weight: 800;
+    color: var(--gold);
+  }
+
+  .metric-label {
+    font-size: 6.5pt;
+    color: var(--text-muted);
+    margin-top: 1px;
+  }
+
+  /* Luxury Flowchart Horizontal */
+  .flow-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
     gap: 4px;
     margin-top: 6px;
-    font-size: 8pt;
   }
 
-  .flow-step {
-    background: #fff;
-    border: 1px solid var(--primary-light);
-    border-radius: 4px;
-    padding: 4px 8px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .flow-arrow {
+  .flow-node {
+    background: var(--dark-card);
+    border: 1px solid var(--border-card);
+    border-radius: 6px;
+    padding: 6px 4px;
     text-align: center;
-    color: var(--primary);
-    font-weight: bold;
-    font-size: 8pt;
-    margin: -2px 0;
+    position: relative;
   }
 
-  .badge {
-    background: var(--primary);
-    color: white;
-    padding: 1px 5px;
-    border-radius: 3px;
+  .flow-step-num {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 6pt;
+    font-weight: 800;
+    color: var(--cyan);
+    margin-bottom: 2px;
+  }
+
+  .flow-node-title {
     font-size: 7.5pt;
+    font-weight: 600;
+    color: #ffffff;
   }
 
-  /* Footer */
+  .flow-node-desc {
+    font-size: 6.5pt;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  /* Footer Section */
   .footer {
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid var(--border-card);
     padding-top: 6px;
-    font-size: 8pt;
-    color: #64748b;
+    font-size: 7pt;
+    color: var(--text-muted);
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
 
-  /* Roadmap styling for Page 2 */
-  .roadmap-item {
-    position: relative;
-    padding-left: 16px;
-    margin-bottom: 8px;
-    border-left: 2px solid var(--secondary);
-  }
-
-  .roadmap-title {
-    font-size: 9.5pt;
-    font-weight: 700;
-    color: var(--secondary);
-  }
-
-  .roadmap-desc {
-    font-size: 8.5pt;
-    color: #475569;
-  }
-
-  .quote-box {
-    background-color: #fff3e0;
-    border-left: 4px solid var(--accent);
-    padding: 8px;
-    border-radius: 0 6px 6px 0;
-    font-size: 8.5pt;
-    font-style: italic;
-    color: #e65100;
+  .investment-quote {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(16, 185, 129, 0.1));
+    border: 1px dashed var(--gold);
+    border-radius: 8px;
+    padding: 8px 10px;
     margin-top: 8px;
+    text-align: center;
+  }
+
+  .quote-text {
+    font-size: 8pt;
+    font-weight: 400;
+    color: #fef08a;
+    font-style: italic;
+  }
+
+  .invest-btn {
+    background: linear-gradient(90deg, var(--emerald) 0%, var(--cyan) 100%);
+    color: #0b0f19;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 7.5pt;
+    font-weight: 800;
+    padding: 4px 12px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    display: inline-block;
+    margin-top: 4px;
   }
 </style>
 </head>
 <body>
 
-  <!-- ================= PAGE 1: FRONT ================= -->
+  <!-- ================= PAGE 1: EXECUTIVE PITCH (FRONT) ================= -->
   <div class="page">
     <div>
-      <div class="header">
-        <span class="tagline">INNOVATION PROTOTYPE</span>
-        <div class="title">AGRI-BOT ESP32</div>
-        <div class="subtitle">หุ่นยนต์พ่นสารเคมีเกษตรอัจฉริยะ ควบคุมไร้สายผ่าน Wi-Fi</div>
+      <div class="glow-bar"></div>
+      <span class="badge-vip">INVESTMENT OPPORTUNITY • AGRI-TECH DISRUPTION</span>
+      <div class="title-executive">AGRI-BOT ESP32</div>
+      <div class="subtitle-executive">นวัตกรรมหุ่นยนต์พ่นสารเคมีอัจฉริยะแบบไร้คนขับ สู่แฟรนไชส์ฟาร์ม 100% Autonomous</div>
+
+      <!-- High-Value Impact Metrics -->
+      <div class="metrics-container">
+        <div class="metric-box">
+          <div class="metric-value">100%</div>
+          <div class="metric-label">Zero-Human Exposure (ปลอดภัยไร้สารเคมี)</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-value">-85%</div>
+          <div class="metric-label">Chemical Waste (ลดการสิ้นเปลืองยา)</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-value">24/7</div>
+          <div class="metric-label">Autonomous Fleet (ทำงานต่อเนื่องไร้ขีดจำกัด)</div>
+        </div>
       </div>
 
-      <div class="section-title">1. ภาพรวมชิ้นงาน (Product Overview)</div>
-      <p style="font-size: 8.5pt; margin: 4px 0 8px 0; color: #334155;">
-        ต้นแบบหุ่นยนต์ขนาดเล็กขับเคลื่อน 4 ล้อ ออกแบบมาเพื่อสาธิตระบบฉีดพ่นละอองสารเคมีจำลองในแปลงเกษตร ควบคุมผ่านสมาร์ตโฟน ช่วยลดการสัมผัสสารเคมีอันตรายของเกษตรกร 100%
-      </p>
+      <div class="section-header">
+        <div class="section-title">1. ขีดความสามารถของระบบต้นแบบ (Core Capabilities)</div>
+      </div>
 
       <div class="grid-2">
-        <div class="card">
-          <div class="card-title">📶 Wi-Fi Web Server</div>
-          <div class="card-desc">ปล่อยสัญญาณ AP ไม่ต้องใช้อินเทอร์เน็ต สั่งงานผ่านหน้าเว็บมือถือทันที</div>
+        <div class="glass-card">
+          <div class="card-title">📶 Autonomous Web-Server</div>
+          <div class="card-desc">ปล่อยสัญญาณควบคุมอิสระโดยไม่ต้องพึ่งอินเทอร์เน็ต รองรับการสั่งงานข้ามแพลตฟอร์มไร้รอยต่อ</div>
         </div>
-        <div class="card">
-          <div class="card-title">🕹️ Differential Drive</div>
-          <div class="card-desc">บังคับทิศทางอิสระ เดินหน้า ถอยหลัง เลี้ยวซ้าย-ขวาได้อย่างแม่นยำ</div>
+        <div class="glass-card">
+          <div class="card-title">🕹️ Differential Vector Drive</div>
+          <div class="card-desc">ระบบขับเคลื่อน 4 ล้ออิสระ เข้าถึงพื้นที่แคบ ขรุขระ และแปลงเกษตรความหนาแน่นสูงได้อย่างสมบูรณ์แบบ</div>
         </div>
-        <div class="card">
-          <div class="card-title">💦 Smart Spraying</div>
-          <div class="card-desc">ควบคุมปั๊มและหัวพ่นหมอกผ่าน Solid-State Relay ฉีดพ่นละอองละเอียด</div>
+        <div class="glass-card">
+          <div class="card-title">💦 Ultra-Precision Spraying</div>
+          <div class="card-desc">ละอองหมอกระดับไมครอน ควบคุมด้วยสวิตช์อิเล็กทรอนิกส์แรงดันสูง ให้การปกคลุมพืชอย่างสม่ำเสมอ</div>
         </div>
-        <div class="card">
-          <div class="card-title">⚡ Safe Power System</div>
-          <div class="card-desc">จ่ายไฟแยกส่วนด้วย Buck Converter ป้องกันบอร์ดรีเซ็ตความปลอดภัยสูง</div>
+        <div class="glass-card">
+          <div class="card-title">⚡ Regulated Power Cell</div>
+          <div class="card-desc">ระบบการจัดการพลังงานแบบแยกส่วน ป้องกันไฟกระชาก มั่นใจได้ในเสถียรภาพการทำงานระดับอุตสาหกรรม</div>
         </div>
       </div>
 
-      <div class="section-title">2. ขั้นตอนการทำงาน (System Flowchart)</div>
-      <div class="flowchart">
-        <div class="flow-step">
-          <span><b>1. Start:</b> เปิดสวิตช์ไฟหลัก</span>
-          <span class="badge">Power ON</span>
+      <div class="section-header">
+        <div class="section-title">2. ขั้นตอนการทำงานที่แม่นยำ (System Architecture)</div>
+      </div>
+
+      <div class="flow-container">
+        <div class="flow-node">
+          <div class="flow-step-num">STEP 01</div>
+          <div class="flow-node-title">Power ON</div>
+          <div class="flow-node-desc">เปิดไฟหลัก ESP32 กระจาย Wi-Fi AP</div>
         </div>
-        <div class="flow-arrow">▼</div>
-        <div class="flow-step">
-          <span><b>2. Setup:</b> ESP32 กระจาย Wi-Fi AP & Ready</span>
-          <span class="badge">Wi-Fi Ready</span>
+        <div class="flow-node">
+          <div class="flow-step-num">STEP 02</div>
+          <div class="flow-node-title">Handshake</div>
+          <div class="flow-node-desc">เชื่อมต่อไร้สาย เข้าหน้าเว็บควบคุม</div>
         </div>
-        <div class="flow-arrow">▼</div>
-        <div class="flow-step">
-          <span><b>3. Decision:</b> ตรวจรับคำสั่งกดปุ่มจากมือถือ</span>
-          <span class="badge">Control UI</span>
+        <div class="flow-node">
+          <div class="flow-step-num">STEP 03</div>
+          <div class="flow-node-title">Execution</div>
+          <div class="flow-node-desc">สั่งเคลื่อนที่ / เปิดระบบพ่นยา</div>
         </div>
-        <div class="flow-arrow">▼</div>
-        <div class="flow-step" style="background: #f8fafc;">
-          <span>• ปุ่มทิศทาง ➔ <b>มอเตอร์หมุน</b><br>• ปุ่มพ่นยา ➔ <b>ปั๊มทำงาน</b><br>• ปล่อยปุ่ม ➔ <b>หยุดนิ่ง</b></span>
-          <span class="badge" style="background: var(--accent);">Action</span>
-        </div>
-        <div class="flow-arrow">▼</div>
-        <div class="flow-step">
-          <span><b>4. End:</b> ปิดสวิตช์ไฟ ตัดระบบทั้งหมด</span>
-          <span class="badge" style="background: #64748b;">Power OFF</span>
+        <div class="flow-node">
+          <div class="flow-step-num">STEP 04</div>
+          <div class="flow-node-title">Safety Stop</div>
+          <div class="flow-node-desc">ปล่อยปุ่ม หรือ ปิดสวิตช์ หยุดทันที</div>
         </div>
       </div>
     </div>
 
     <div class="footer">
-      <span>หน้า 1 / 2 (ด้านหน้า)</span>
-      <span>AGRI-BOT PROTOTYPE A5 FLYER</span>
+      <span>CONFIDENTIAL • FOR EXECUTIVE & INVESTOR REVIEW ONLY</span>
+      <span>PAGE 01 / 02</span>
     </div>
   </div>
 
-  <!-- ================= PAGE 2: BACK ================= -->
+  <!-- ================= PAGE 2: VISION & COMMERCIAL ROADMAP (BACK) ================= -->
   <div class="page">
     <div>
-      <div class="header" style="border-color: var(--secondary);">
-        <span class="tagline" style="background-color: var(--secondary);">VISIONARY ROADMAP</span>
-        <div class="title" style="color: var(--secondary);">FUTURE OF AGRI-TECH</div>
-        <div class="subtitle">การต่อยอดสู่แพลตฟอร์มหุ่นยนต์เกษตรไร้คนขับ 100%</div>
+      <div class="glow-bar"></div>
+      <div class="section-header" style="margin-top: 0;">
+        <div class="section-title" style="color: var(--gold);">1. สเปกฮาร์ดแวร์ระดับอุตสาหกรรม (Hardware Stack)</div>
       </div>
 
-      <div class="section-title" style="border-color: var(--secondary); background: #e0f2fe;">1. อุปกรณ์หลักในชิ้นงาน (Hardware Stack)</div>
-      <table>
-        <thead>
-          <tr>
-            <th>อุปกรณ์</th>
-            <th>หน้าที่การทำงาน</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><b>ESP32 Dev Board</b></td>
-            <td>ประมวลผลหลัก และสร้าง Web Server ไร้สาย</td>
-          </tr>
-          <tr>
-            <td><b>L298N Driver</b></td>
-            <td>ควบคุมการหมุนและทิศทางของมอเตอร์ล้อทั้ง 4 ตัว</td>
-          </tr>
-          <tr>
-            <td><b>Relay Module</b></td>
-            <td>สวิตช์อิเล็กทรอนิกส์ ตัด-ต่อ ไฟจ่ายให้ปั๊มพ่นน้ำ</td>
-          </tr>
-          <tr>
-            <td><b>Mini Pump & Nozzle</b></td>
-            <td>ปั๊มสูบน้ำและหัวฉีดละอองหมอกจำลองการพ่นยา</td>
-          </tr>
-          <tr>
-            <td><b>Li-ion 18650 & Buck</b></td>
-            <td>แหล่งพลังงาน 7.4V และวงจรแปลงไฟเลี้ยงบอร์ด 5V</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <div class="section-title" style="border-color: var(--secondary); background: #e0f2fe;">2. แผนพัฒนาต่อยอดอนาคต (Roadmap)</div>
-      
-      <div style="margin-top: 8px;">
-        <div class="roadmap-item">
-          <div class="roadmap-title">🌱 Phase 1: AI Precision Spraying</div>
-          <div class="roadmap-desc">ติดตั้งกล้อง AI ตรวจจับโรคพืชเฉพาะจุด สั่งพ่นยาเฉพาะใบที่มีปัญหา ลดการใช้สารเคมีลง 80-90%</div>
-        </div>
-
-        <div class="roadmap-item">
-          <div class="roadmap-title">🤖 Phase 2: Swarm Autonomous Fleet</div>
-          <div class="roadmap-desc">ขยายสเกลสู่ฝูงหุ่นยนต์พ่นยาไร้คนขับ สั่งการผ่าน RTK-GPS ความแม่นยำระดับเซนติเมตร</div>
-        </div>
-
-        <div class="roadmap-item" style="border-color: var(--accent);">
-          <div class="roadmap-title" style="color: var(--accent);">⚡ Phase 3: Auto-Docking & Green Energy</div>
-          <div class="roadmap-desc">สถานีชาร์จไฟโซลาร์เซลล์และเติมยาอัตโนมัติ 24 ชม. พร้อมวัดผล Carbon Credits ขายในตลาดโลก</div>
+      <div class="glass-card" style="margin-bottom: 8px;">
+        <div style="font-size: 7.5pt; color: #e2e8f0;">
+          • <b>Main Processing Unit:</b> ESP32 Microcontroller 240MHz Dual-Core (Wi-Fi/BT Built-in)<br>
+          • <b>Drive Controller:</b> L298N Dual H-Bridge Heavy-Duty Motor Driver<br>
+          • <b>Actuator & Spraying:</b> 5V Optocoupler Solid-State Relay + Mini Diaphragm Pump<br>
+          • <b>Power Management:</b> Dual-Cell 18650 Li-ion (7.4V) + Buck Converter Step-Down 5V Constant
         </div>
       </div>
 
-      <div class="quote-box">
-        "ชิ้นงานนี้ไม่ใช่แค่รถบังคับพ่นยา แต่คือ <b>พิมพ์เขียวทางเทคโนโลยี (Technological Blueprint)</b> แรกของระบบนิเวศการเกษตรแห่งอนาคต"
+      <div class="section-header">
+        <div class="section-title" style="color: var(--cyan);">2. วิสัยทัศน์การเติบโตทางธุรกิจ (Scalability Roadmap)</div>
+      </div>
+
+      <div class="glass-card" style="margin-bottom: 6px; border-left-color: var(--cyan);">
+        <div class="card-title" style="color: var(--cyan);">PHASE 1: AI Targeted Spraying (Computer Vision)</div>
+        <div class="card-desc">ติดตั้งกล้องประมวลผล AI ตรวจจับใบพืชที่มีโรคหรือวัชพืช และฉีดพ่นยาเฉพาะจุดด้วยความแม่นยำสูง ลดต้นทุนเคมีภัณฑ์มหาศาล</div>
+      </div>
+
+      <div class="glass-card" style="margin-bottom: 6px; border-left-color: var(--emerald);">
+        <div class="card-title" style="color: var(--emerald-light);">PHASE 2: Autonomous Swarm Fleet & Auto-Docking</div>
+        <div class="card-desc">ฝูงหุ่นยนต์พ่นยาไร้คนขับ นำทางด้วย RTK-GPS พร้อมระบบวิ่งกลับเข้าสถานีเติมยาและชาร์จไฟโซลาร์เซลล์อัตโนมัติ 24 ชั่วโมง</div>
+      </div>
+
+      <div class="glass-card" style="margin-bottom: 6px; border-left-color: var(--gold);">
+        <div class="card-title" style="color: var(--gold);">PHASE 3: Carbon Credit & Data Monetization</div>
+        <div class="card-desc">เปลี่ยนฟาร์มสู่โซลาร์ 100% พร้อมวัดผลสร้าง Carbon Credits ขายในตลาดสากล และแปลงข้อมูลสุขภาพพืชเป็น Crop Map ขายอุตสาหกรรมประกันภัย</div>
+      </div>
+
+      <div class="investment-quote">
+        <div class="quote-text">
+          "ต้นแบบนี้ไม่ใช่เพียงแค่หุ่นยนต์ แต่คือดีเอ็นเอแรกของระบบนิเวศเกษตรกรรมมูลค่ามหาศาล"
+        </div>
+        <div class="invest-btn">JOIN THE FUTURE OF AGRI-TECH</div>
       </div>
     </div>
 
     <div class="footer">
-      <span>หน้า 2 / 2 (ด้านหลัง)</span>
-      <span>ติดต่อ / Scan QR Code ดูสาธิตการทำงาน</span>
+      <span>AGRI-BOT DISRUPTIVE PLATFORM 2026</span>
+      <span>PAGE 02 / 02</span>
     </div>
   </div>
 
