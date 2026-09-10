@@ -1,1 +1,701 @@
-a
+
+<!DOCTYPE html><html lang="th"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mind Map: อคิลลิส (Achilles)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&amp;family=Sarabun:wght@300;400;600;700&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+/* Reset & Base Setup */
+​{
+box-sizing: border-box;
+margin: 0;
+padding: 0;
+}
+​body {
+background-color: #0d0b0a;
+display: grid;
+gap: 24px;
+grid-template-columns: 1fr;
+min-height: 100vh;
+padding: 30px 0;
+place-items: center;
+font-family: 'Sarabun', sans-serif;
+color: #ebd8c3;
+}
+​.slide-container {
+align-items: center;
+background-color: #1a1512;
+border: 4px solid #c06830;
+border-radius: 8px;
+box-shadow: 0 12px 28px rgba(0, 0, 0, 0.8), inset 0 0 60px rgba(0, 0, 0, 0.6);
+display: flex;
+flex-direction: column;
+height: 720px;
+justify-content: flex-start;
+overflow: hidden;
+padding: 40px;
+position: relative;
+width: 1280px;
+}
+​/* Greek Pottery Meander Border Style */
+.slide-container::before {
+content: '';
+position: absolute;
+top: 10px;
+left: 10px;
+right: 10px;
+bottom: 10px;
+border: 2px dashed #d89a4a;
+pointer-events: none;
+opacity: 0.4;
+z-index: 1;
+}
+​.greek-border-top {
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 14px;
+background: repeating-linear-gradient(90deg, #c06830 0px, #c06830 15px, #1a1512 15px, #1a1512 25px, #d89a4a 25px, #d89a4a 40px);
+z-index: 2;
+}
+​.greek-border-bottom {
+position: absolute;
+bottom: 0;
+left: 0;
+width: 100%;
+height: 14px;
+background: repeating-linear-gradient(90deg, #c06830 0px, #c06830 15px, #1a1512 15px, #1a1512 25px, #d89a4a 25px, #d89a4a 40px);
+z-index: 2;
+}
+​.slide-container > * {
+position: relative;
+z-index: 3;
+}
+​/* Typography */
+h1, h2, h3, .greek-title {
+font-family: 'Cinzel', 'Sarabun', serif;
+color: #d89a4a;
+text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+​h1 {
+font-size: 54px;
+letter-spacing: 2px;
+text-align: center;
+}
+​.slide-title {
+font-size: 34px;
+font-weight: 700;
+margin-bottom: 25px;
+text-align: left;
+width: 100%;
+border-bottom: 2px solid #c06830;
+padding-bottom: 8px;
+color: #f4e3c8;
+}
+​p, li {
+font-size: 18px;
+line-height: 1.5;
+color: #dfcdb8;
+}
+​.subtitle {
+color: #d89a4a;
+font-size: 22px;
+margin-top: 10px;
+text-align: center;
+}
+​.content-area {
+align-items: center;
+display: flex;
+flex-direction: column;
+flex-grow: 1;
+justify-content: center;
+width: 100%;
+}
+​/* Layout - Mind Map Page */
+.mindmap-container {
+display: flex;
+align-items: center;
+justify-content: center;
+width: 100%;
+height: 100%;
+position: relative;
+}
+​.central-node {
+background: radial-gradient(circle, #8a3a14 0%, #3a1909 100%);
+border: 4px solid #d89a4a;
+border-radius: 50%;
+width: 220px;
+height: 220px;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+box-shadow: 0 0 25px rgba(216, 154, 74, 0.4);
+z-index: 5;
+text-align: center;
+padding: 15px;
+}
+​.central-node h2 {
+font-size: 28px;
+color: #fff;
+line-height: 1.2;
+}
+​.central-node span {
+font-size: 14px;
+color: #d89a4a;
+margin-top: 4px;
+}
+​.branch-grid {
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+gap: 25px;
+width: 100%;
+height: 100%;
+align-items: stretch;
+}
+​.mindmap-card {
+background-color: #241c17;
+border: 2px solid #c06830;
+border-radius: 12px;
+padding: 24px;
+display: flex;
+flex-direction: column;
+position: relative;
+box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+transition: transform 0.2s;
+}
+​.mindmap-card:hover {
+border-color: #d89a4a;
+}
+​.card-header {
+display: flex;
+align-items: center;
+gap: 12px;
+margin-bottom: 16px;
+border-bottom: 1px solid rgba(216, 154, 74, 0.3);
+padding-bottom: 10px;
+}
+​.card-header i {
+font-size: 26px;
+color: #d89a4a;
+}
+​.card-header h3 {
+font-size: 22px;
+color: #f4e3c8;
+}
+​.card-list {
+list-style: none;
+display: flex;
+flex-direction: column;
+gap: 12px;
+}
+​.card-list li {
+position: relative;
+padding-left: 20px;
+font-size: 16px;
+}
+​.card-list li::before {
+content: '◆';
+position: absolute;
+left: 0;
+color: #c06830;
+font-size: 12px;
+top: 2px;
+}
+​/* Two Column & Layout Components */
+.two-column {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 40px;
+width: 100%;
+height: 100%;
+align-items: center;
+}
+​.image-wrapper {
+border: 3px solid #d89a4a;
+border-radius: 8px;
+height: 440px;
+overflow: hidden;
+box-shadow: 0 8px 20px rgba(0,0,0,0.7);
+background-color: #000;
+}
+​.image-wrapper img {
+width: 100%;
+height: 100%;
+object-fit: cover;
+}
+​.info-box {
+background: rgba(36, 28, 23, 0.85);
+border-left: 4px solid #d89a4a;
+padding: 20px 25px;
+border-radius: 0 8px 8px 0;
+margin-bottom: 18px;
+}
+​.info-box h3 {
+font-size: 22px;
+color: #d89a4a;
+margin-bottom: 8px;
+display: flex;
+align-items: center;
+gap: 10px;
+}
+​.info-box p {
+font-size: 16px;
+line-height: 1.5;
+}
+​/* Badge tag /
+.badge {
+background-color: #c06830;
+color: #fff;
+padding: 3px 10px;
+border-radius: 4px;
+font-size: 13px;
+font-weight: bold;
+display: inline-block;
+margin-bottom: 6px;
+}
+</style>
+<style>
+.lms-source-label {
+position: absolute;
+top: 8px;
+right: 8px;
+background-color: #e0e0e0;
+color: #333333;
+border-radius: 10px;
+padding: 4px 4px;
+font-family: sans-serif;
+font-size: 10px;
+pointer-events: none;
+font-weight: 500;
+box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+</style><style>
+:where(.slide-attributions) {
+padding: 60px;
+}
+.attribution-list {
+list-style: none;
+margin: 0;
+padding: 0;
+}
+.attribution-list__item {
+align-items: center;
+border-bottom: 1px solid #757575;
+display: grid;
+gap: 25px;
+grid-template-columns: 90px 1fr;
+padding: 15px 0;
+margin: 0 !important;
+}
+.attribution-list__item::before {
+display: none;
+}
+.attribution-list__item::after {
+display: none;
+}
+.attribution-list__item:last-child {
+border-bottom: none;
+}
+.attribution-list__item .attribution__thumbnail {
+height: 50px;
+width: 90px;
+}
+.attribution__thumbnail .attribution__thumbnail__image {
+border-radius: 8px;
+height: 100%;
+object-fit: cover;
+width: 100%;
+}
+.attribution__details {
+display: flex;
+flex-direction: column;
+gap: 5px;
+}
+.attribution__details .attribution__raw-url {
+color: inherit;
+font-size: 13px;
+margin: 0;
+word-break: break-all;
+}
+.attribution__details .attribution__title {
+color: inherit;
+font-size: 16px;
+margin: 0;
+}
+.attribution__details .attribution__title > .attribution__link {
+color: #4f46e5;
+text-decoration: none;
+}
+</style><style>
+/ The container that fills available space. It's the positioning context. /
+#slideshow-holder {
+width: 100%;
+position: relative;
+flex-grow: 1; / Replaces flex-grow Tailwind class for clarity /
+overflow: hidden;
+padding: 1rem; / Replaces p-4 Tailwind class */
+}
+​/* UI controls should not be text-selectable. */
+#nav-controls.select-none,
+#theme-toggle.select-none {
+user-select: none;
+-webkit-user-select: none;
+}
+​/* The element that is scaled and centered. /
+#slideshow-wrapper {
+width: 1280px;
+height: 720px;
+position: absolute;
+top: 50%;
+left: 50%;
+transform-origin: center;
+transform: translate(-50%, -50%) scale(var(--scale-factor, 1));
+transition: transform 0.3s ease-in-out;
+/ Visual styles moved here from the holder */
+border-radius: 0.5rem;
+box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+overflow: hidden;
+}
+​/* Update slide container styles */
+.slide-container {
+width: 100%;
+height: 100%;
+overflow: hidden;
+position: absolute;
+top: 0;
+left: 0;
+opacity: 0;
+pointer-events: none;
+transition: opacity 0.5s ease-in-out;
+}
+​/* Make the active slide visible */
+.slide-container.active {
+opacity: 1;
+pointer-events: auto;
+}
+</style><script src="https://cdn.tailwindcss.com/3.4.17"></script><script>
+tailwind.config = {
+darkMode: 'class',
+corePlugins: {
+preflight: false,
+},
+}
+</script></head>
+<body class="bg-gray-100 dark:bg-gray-900 flex flex-col h-screen transition-colors duration-300">
+​<!-- Slide 1: Title Slide with User Uploaded Image -->
+​<!-- Slide 2: Mind Map Overview Layout -->
+​<!-- Slide 3: Detailed Branch 1 - ประวัติและความเป็นมา -->
+​<!-- Slide 4: Detailed Branch 2 - ถิ่นกำเนิดและการเติบโต -->
+​<!-- Slide 5: Detailed Branch 3 - ผลงานเด่นในสงครามกรุงทรอย -->
+​<button id="theme-toggle" class="select-none absolute top-4 right-4 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm p-2 rounded-full shadow-md text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white transition-all duration-300 z-20 border-none leading-[0] cursor-pointer">
+<svg id="theme-toggle-dark-icon" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+<svg id="theme-toggle-light-icon" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 -960 960 960"><path d="M480-280q-83 0-141.5-58.5T280-480q0-83 58.5-141.5T480-680q83 0 141.5 58.5T680-480q0 83-58.5 141.5T480-280ZM200-440H40v-80h160v80Zm720 0H760v-80h160v80ZM440-760v-160h80v160h-80Zm0 720v-160h80v160h-80ZM256-650l-101-97 57-59 96 100-52 56Zm492 496-97-101 53-55 101 97-57 59Zm-98-550 97-101 59 57-100 96-56-52ZM154-212l101-97 55 53-97 101-59-57Z"></path></svg>
+</button>
+​<div id="nav-controls" class="select-none relative flex-shrink-0 w-full flex justify-center items-center p-4">
+<span id="slide-counter" class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-medium text-gray-600 dark:text-gray-400 font-sans"></span>
+<div class="flex items-center space-x-2">
+<button id="prev-slide" class="bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 p-2 rounded-md transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-md border-none leading-[0] cursor-pointer">
+<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
+</button>
+<button id="next-slide" class="bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 p-2 rounded-md transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-md border-none leading-[0] cursor-pointer">
+<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
+</button>
+</div>
+</div>
+​<div id="slideshow-holder"><div id="slideshow-wrapper"><div class="slide-container" id="slide1">
+<div class="greek-border-top"></div>
+<div class="greek-border-bottom"></div>
+<div class="content-area" style="display: flex; flex-direction: row; gap: 50px; text-align: left;">
+<div style="flex: 1.2; display: flex; flex-direction: column; justify-content: center;">
+<div class="badge">MIND MAP SUMMARY</div>
+<h1 style="text-align: left; font-size: 56px; color: #f4e3c8;">อคิลลิส (Achilles)</h1>
+<p class="subtitle" style="text-align: left; font-size: 24px; color: #d89a4a; margin-top: 5px; margin-bottom: 25px;">
+ยอดนักรบไร้พ่ายแห่งมหากาพย์สงครามกรุงทรอย
+</p>
+<div class="info-box">
+<h3><i class="fa-solid fa-scroll"></i> สรุปผันความคิด (Mind Map)</h3>
+<p>รวบรวม 3 หัวข้อหลัก: ประวัติความเป็นมา, ถิ่นกำเนิดและการเติบโต, และผลงานเด่นในสงครามกรุงทรอย ในรูปแบบกระชับ เข้าใจง่าย</p>
+</div>
+</div>
+<div style="flex: 0.8; display: flex; justify-content: center; align-items: center;">
+<div class="image-wrapper" style="height: 480px; width: 100%;">
+<!-- User's exact uploaded image -->
+<img src="https://lh3.googleusercontent.com/gg-dl/AAQ_wbHuyyG8-5jxoGw57j-0LSiy9JYCPqPjNo0goZ_sW5Rs1tGjQQwb1Bwybgd52q8guhtw985GtaPtSuvjb53df5Tw2t6FnO-QCSmnRIxhaAfIgDkACFSUC5tBcrbRLZGJVQgNnUbRb5N1P6vHI8E83fGDhXCT7_enZAxcD9DOQ9NqK9mjuw=s0" alt="Achilles Greek Pottery Art">
+</div>
+</div>
+</div>
+</div><div class="slide-container" id="slide2">
+<div class="greek-border-top"></div>
+<div class="greek-border-bottom"></div>
+<h2 class="slide-title"><i class="fa-solid fa-sitemap"></i> ภาพรวมแผนผังความคิด (Mind Map Overview)</h2>
+<div class="content-area">
+<div class="branch-grid">
+​<!-- Branch 1 -->
+<div class="mindmap-card">
+<div class="card-header">
+<i class="fa-solid fa-shield-halved"></i>
+<h3>1. ประวัติความเป็นมา</h3>
+</div>
+<ul class="card-list">
+<li><strong>สายเลือด:</strong> ลูกครึ่งเทพ (พ่อ: กษัตริย์เพเลอุส / แม่: เทพีเททิส)</li>
+<li><strong>กายสิทธิ์:</strong> จุ่มแม่น้ำสติกซ์ ร่างกายฟันแทงไม่เข้า</li>
+<li><strong>จุดอ่อน:</strong> บริเวณ "ส้นเท้า" (Achilles' Heel) เพราะแม่จับไว้ตอนจุ่มน้ำ</li>
+<li><strong>วิชาการต่อสู้:</strong> ศิษย์ของเซนทอร์ไครอน บนเขาเพลิออน</li>
+</ul>
+</div>
+​<!-- Branch 2 -->
+<div class="mindmap-card">
+<div class="card-header">
+<i class="fa-solid fa-landmark"></i>
+<h3>2. ถิ่นกำเนิด & เติบโต</h3>
+</div>
+<ul class="card-list">
+<li><strong>เมืองกำเนิด:</strong> เมืองฟเทีย (Phthia) แคว้นเทสซาลี ทางเหนือของกรีซ</li>
+<li><strong>สถานะทางบ้าน:</strong> เจ้าชายแห่งฟเทีย บุตรกษัตริย์ผู้ครองเมือง</li>
+<li><strong>สถานที่เติบโต:</strong> ฝึกวิชารบ การแพทย์ ยุทธวิธี บนเทือกเขาเพลิออน</li>
+<li><strong>สหายร่วมเติบโต:</strong> พาโทรคลัส (Patroclus) สหายสนิทคู่ใจ</li>
+</ul>
+</div>
+​<!-- Branch 3 -->
+<div class="mindmap-card">
+<div class="card-header">
+<i class="fa-solid fa-hand-fist"></i>
+<h3>3. ผลงานในสงคราม</h3>
+</div>
+<ul class="card-list">
+<li><strong>แม่ทัพใหญ่:</strong> นำกองทัพนักรบเมอร์มิดอน (Myrmidons)</li>
+<li><strong>ทลายเมืองบริวาร:</strong> ตีแตกกว่า 20 หัวเมืองรอบกรุงทรอย</li>
+<li><strong>สังหารเฮกเตอร์:</strong> ดวลตัวต่อตัวแก้แค้นให้พาโทรคลัส</li>
+<li><strong>ปราบแม่ทัพทรอย:</strong> สังหารเมมนอน & เพนเธซิเลีย (ราชินีอเมซอน)</li>
+</ul>
+</div>
+​</div>
+</div>
+</div><div class="slide-container" id="slide3">
+<div class="greek-border-top"></div>
+<div class="greek-border-bottom"></div>
+<h2 class="slide-title">1. ประวัติความเป็นมาของอคิลลิส</h2>
+<div class="content-area">
+<div class="two-column">
+<div>
+<div class="info-box">
+<h3><i class="fa-solid fa-dna"></i> กำเนิดสายเลือดเทพ-มนุษย์</h3>
+<p>บิดาคือ <strong>กษัตริย์เพเลอุส</strong> มนุษย์ผู้ครองเมืองฟเทีย ส่วนมารดาคือ <strong>เทพีเททิส</strong> นิมฟ์แห่งท้องทะเล</p>
+</div>
+​<div class="info-box">
+<h3><i class="fa-solid fa-water"></i> ตำนานแม่น้ำสติกซ์ (Styx)</h3>
+<p>เทพีเททิสนำร่างทารกอคิลลิสไปจุ่มแม่น้ำสติกซ์เพื่อให้เป็นอมตะ ฟันแทงไม่เข้า แต่ส้นเท้าเป็นจุดที่แม่จับไว้ จึงเป็นจุดเดียวที่ไม่โดนน้ำ</p>
+</div>
+​<div class="info-box">
+<h3><i class="fa-solid fa-bullseye"></i> สำนวน Achilles' Heel</h3>
+<p>จุดอ่อนส้นเท้าส่งผลให้ปารีสยิงธนูใส่ส้นเท้าจนอคิลลิสเสียชีวิต กลายเป็นที่มาของคำว่า "จุดอ่อนตายตัว"</p>
+</div>
+</div>
+​<div class="image-wrapper">
+<img src="https://as2.ftcdn.net/v2/jpg/02/41/33/27/1000_F_241332732_WMIcO7FLDKkGhPYqCpSl7hFqTtM823uO.jpg" alt="Achilles Trojan War Pottery Art">
+</div>
+</div>
+</div>
+</div><div class="slide-container" id="slide4">
+<div class="greek-border-top"></div>
+<div class="greek-border-bottom"></div>
+<h2 class="slide-title">2. ถิ่นกำเนิดและการเติบโต</h2>
+<div class="content-area">
+<div class="two-column">
+<div class="image-wrapper">
+<!-- Exact uploaded user image reused for layout balance -->
+<img src="https://lh3.googleusercontent.com/gg-dl/AAQ_wbHuyyG8-5jxoGw57j-0LSiy9JYCPqPjNo0goZ_sW5Rs1tGjQQwb1Bwybgd52q8guhtw985GtaPtSuvjb53df5Tw2t6FnO-QCSmnRIxhaAfIgDkACFSUC5tBcrbRLZGJVQgNnUbRb5N1P6vHI8E83fGDhXCT7_enZAxcD9DOQ9NqK9mjuw=s0" alt="Achilles Warrior Art">
+</div>
+​<div>
+<div class="info-box">
+<h3><i class="fa-solid fa-location-dot"></i> เมืองฟเทีย (Phthia)</h3>
+<p>อคิลลิสเกิดและเติบโตในเมืองฟเทีย แคว้นเทสซาลี (ทางตอนเหนือของประเทศกรีซในปัจจุบัน) ซึ่งเป็นอาณาจักรของบิดา</p>
+</div>
+​<div class="info-box">
+<h3><i class="fa-solid fa-mountain"></i> สำนักเซนทอร์ไครอน (Mount Pelion)</h3>
+<p>ถูกส่งไปฝึกวิชาการต่อสู้ กลยุทธ์ ดนตรี และการแพทย์กับ <strong>ไครอน (Chiron)</strong> เซนทอร์ผู้รอบรู้บนเทือกเขาเพลิออน</p>
+</div>
+​<div class="info-box">
+<h3><i class="fa-solid fa-user-group"></i> มิตรภาพกับพาโทรคลัส</h3>
+<p>เติบโตและฝึกฝนเคียงข้าง <strong>พาโทรคลัส (Patroclus)</strong> สหายสนิทผู้เป็นแรงขับดันสำคัญในสงครามกรุงทรอย</p>
+</div>
+</div>
+</div>
+</div>
+</div><div class="slide-container" id="slide5">
+<div class="greek-border-top"></div>
+<div class="greek-border-bottom"></div>
+<h2 class="slide-title">3. ผลงานเด่นในสงครามกรุงทรอย</h2>
+<div class="content-area">
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; width: 100%;">
+<div class="info-box">
+<h3><i class="fa-solid fa-crown"></i> ผู้นำนักรบเมอร์มิดอน (Myrmidons)</h3>
+<p>นำกองทัพเมอร์มิดอนที่ขึ้นชื่อว่าดุดันที่สุด สร้างความพรั่นพรึงให้ฝั่งทรอยตลอดระยะเวลาสงคราม</p>
+</div>
+​<div class="info-box">
+<h3><i class="fa-solid fa-chess-knight"></i> บุกยึดเมืองบริวารกว่า 20 แห่ง</h3>
+<p>ในช่วง 9 ปีแรก อคิลลิสเป็นกำลังหลักในการบุกทำลายหัวเมืองรอบนอก ตัดกำลังและเสบียงของทรอย</p>
+</div>
+​<div class="info-box">
+<h3><i class="fa-solid fa-crosshairs"></i> สังหารเฮกเตอร์ (Hector)</h3>
+<p>ดวลตัวต่อตัวสังหารเฮกเตอร์ เจ้าชายแห่งทรอย เพื่อแก้แค้นให้พาโทรคลัส ถือเป็นจุดเปลี่ยนสำคัญของสงคราม</p>
+</div>
+​<div class="info-box">
+<h3><i class="fa-solid fa-skull"></i> กำจัดยอดนักรบพันธมิตรทรอย</h3>
+<p>สังหารแม่ทัพสำคัญ เช่น เมมนอน (กษัตริย์เอธิโอเปีย) และเพนเธซิเลีย (ราชินีแห่งอเมซอน)</p>
+</div>
+</div>
+</div>
+</div><div class="slide-container slide-attributions" id="slide-attributions-1"><h2 class="slide-title">Image Sources</h2><div class="content-area"><ul class="attribution-list"><li class="attribution-list__item"><div class="attribution__thumbnail"><img class="attribution__thumbnail__image" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRF6m7rVV3Qfnnn2MSv_zhc_lhs480gfbMHr_LtIBd6CdNt4q4wrfjWqEtcGpMj" alt="Thumbnail for www.posters.cz"></div><div class="attribution__details"><p class="attribution__raw-url">https://as2.ftcdn.net/v2/jpg/02/41/33/27/1000_F_241332732_WMIcO7FLDKkGhPYqCpSl7hFqTtM823uO.jpg</p><p class="attribution__title">Source: <a href="https://www.posters.cz/orange-and-black-figures-pottery-amphora-painting-of-troy-war-with-achilles-figh-f241332732" target="_blank" class="attribution__link">www.posters.cz</a></p></div></li></ul></div></div></div></div><script>
+/**
+​Fetches an image blob using a method that attempts to bypass CORS issues
+​by adding 'alr=yes' to the URL and following redirects.
+*/
+async function fetchFifeImageBlobUsingAlr(urlString) {
+if (urlString.startsWith('blob:') || urlString.startsWith('data:')) {
+throw new Error('Input URL is already a blob or data URL.');
+}
+let url = new URL(urlString, window.location.href);
+url.searchParams.set('alr', 'yes');
+for (let i = 0; i < 5; i++) {
+const response = await fetch(url.toString(), {credentials: 'include'});
+if (!response.ok) {
+throw new Error(Fetch received not OK response: ${response.status});
+}
+if (!response.headers.get('content-type')?.startsWith('text/plain')) {
+const blob = await response.blob();
+if (blob.size > 0 && blob.type.startsWith('image/')) {
+return blob;
+}
+throw new Error('Fetched blob is not a valid image.');
+}
+url = new URL(await response.text());
+}
+throw new Error('Exceeded maximum number of redirects.');
+}
+​async function updateImageSourcesUsingAlr() {
+// Use Promise.all to handle all updates concurrently for better performance.
+await Promise.all(Array.from(document.querySelectorAll('img'), async (img) => {
+// Only proceed if the img tag has a valid 'src' attribute with a
+// googleusercontent URL.
+if (img.src && img.src.includes('googleusercontent')) {
+try {
+const blob = await fetchFifeImageBlobUsingAlr(img.src);
+// Create a new URL from the Blob and set it as the image's source.
+img.src = URL.createObjectURL(blob);
+} catch (error) {
+// Do nothing.
+}
+}
+}));
+}
+​async function updateBackgroundImagesUsingAlr() {
+// Find all elements with a googleusercontent background image.
+const elementsToProcess =
+document.querySelectorAll('[style*="googleusercontent"]');
+const urlRegex = /url((['"]?)(https?://.?googleusercontent.?)\1)/;
+​await Promise.all(Array.from(elementsToProcess, async (element) => {
+const backgroundImage = element.style.backgroundImage;
+const match = backgroundImage.match(urlRegex);
+​if (match && match[2]) {
+const originalUrl = match[2];
+try {
+const blob = await fetchFifeImageBlobUsingAlr(originalUrl);
+const blobUrl = URL.createObjectURL(blob);
+​// Directly update the element's style property.
+element.style.backgroundImage =
+backgroundImage.replace(originalUrl, blobUrl);
+} catch (error) {
+// Do nothing.
+}
+}
+}));
+}
+​// --- SLIDESHOW LOGIC ---
+function initializeSlideshowUi() {
+const slides = document.querySelectorAll('.slide-container');
+const prevButton = document.getElementById('prev-slide');
+const nextButton = document.getElementById('next-slide');
+const slideCounter = document.getElementById('slide-counter');
+let currentSlide = 0;
+​function updateUi() {
+slides.forEach((slide, index) => {
+slide.classList.toggle('active', index === currentSlide);
+});
+prevButton.disabled = currentSlide === 0;
+nextButton.disabled = currentSlide === slides.length - 1;
+slideCounter.textContent = Slide ${currentSlide + 1} of ${slides.length};
+}
+​function showNextSlide() {
+if (currentSlide < slides.length - 1) {
+currentSlide++;
+updateUi();
+}
+}
+​function showPrevSlide() {
+if (currentSlide > 0) {
+currentSlide--;
+updateUi();
+}
+}
+​nextButton.addEventListener('click', showNextSlide);
+prevButton.addEventListener('click', showPrevSlide);
+document.addEventListener('keydown', (e) => {
+// Don't intercept arrow keys when the user is editing text.
+const el = e.target;
+if (el.isContentEditable || el.tagName === 'INPUT' ||
+el.tagName === 'TEXTAREA') {
+return;
+}
+if (e.key === 'ArrowRight') {
+showNextSlide();
+} else if (e.key === 'ArrowLeft') {
+showPrevSlide();
+}
+});
+​const themeToggleBtn = document.getElementById('theme-toggle');
+const darkIcon = document.getElementById('theme-toggle-dark-icon');
+const lightIcon = document.getElementById('theme-toggle-light-icon');
+const htmlEl = document.documentElement;
+​function setTheme(isDark) {
+htmlEl.classList.toggle('dark', isDark);
+darkIcon.classList.toggle('hidden', isDark);
+lightIcon.classList.toggle('hidden', !isDark);
+localStorage.setItem('color-theme', isDark ? 'dark' : 'light');
+}
+const isDarkMode = localStorage.getItem('color-theme') === 'dark' ||
+(!('color-theme' in localStorage) &&
+window.matchMedia('(prefers-color-scheme: dark)').matches);
+setTheme(isDarkMode);
+themeToggleBtn.addEventListener(
+'click', () => setTheme(!htmlEl.classList.contains('dark')));
+​function updateScale() {
+const baseWidth = 1280;
+const baseHeight = 720;
+const slideshowWrapper = document.getElementById('slideshow-wrapper');
+const slideshowHolder = document.getElementById('slideshow-holder');
+​// The available space is the dimensions of the holder div.
+const availableWidth = slideshowHolder.clientWidth;
+const availableHeight = slideshowHolder.clientHeight;
+​// Calculate the scale ratio based on both width and height
+const scaleX = availableWidth / baseWidth;
+const scaleY = availableHeight / baseHeight;
+​// Use the smaller of the two ratios to ensure it fits
+const finalScale = Math.min(scaleX, scaleY);
+​slideshowWrapper.style.setProperty('--scale-factor', finalScale);
+}
+​updateUi();
+updateScale();
+window.addEventListener('resize', updateScale);
+}
+​document.addEventListener('DOMContentLoaded', async function() {
+await Promise.all(
+[updateImageSourcesUsingAlr(), updateBackgroundImagesUsingAlr()]);
+initializeSlideshowUi();
+});
+</script></body></html>
