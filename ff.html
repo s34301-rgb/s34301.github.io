@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Civil Engineering Calculator Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0ea5e9',
+                        secondary: '#10b981',
+                        dark: '#0f172a',
+                        card: '#1e293b',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        display: ['Orbitron', 'sans-serif'],
+                    },
+                },
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .glow-text {
+                text-shadow: 0 0 8px rgba(56, 189, 248, 0.8),
+                            0 0 16px rgba(56, 189, 248, 0.6),
+                            0 0 24px rgba(56, 189, 248, 0.4);
+            }
+            .glow-border {
+                box-shadow: 0 0 8px rgba(56, 189, 248, 0.5),
+                            inset 0 0 8px rgba(56, 189, 248, 0.3);
+            }
+            .card-hover {
+                transition: all 0.3s ease;
+            }
+            .card-hover:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 25px rgba(56, 189, 248, 0.3);
+            }
+        }
+    </style>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&display=swap" rel="stylesheet">
+</head>
+<body class="bg-slate-900 text-white min-h-screen font-sans">
+    <!-- Page 1: Landing Page -->
+    <div id="landingPage" class="min-h-screen flex flex-col items-center justify-center px-4 py-12">
+        <div class="text-center max-w-4xl mx-auto">
+            <h1 class="font-display font-extrabold text-[clamp(2.5rem,8vw,4.5rem)] text-sky-400 mb-6 tracking-wider glow-text">
+                CIVIL ENGINEERING CALCULATOR
+            </h1>
+            <p class="text-slate-300 text-[clamp(1rem,3vw,1.25rem)] mb-10 max-w-2xl mx-auto leading-relaxed">
+                Comprehensive calculation tools for structural analysis, quantity estimation, 
+                reinforced concrete design, geotechnics, hydraulics, and transportation engineering.
+            </p>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-12">
+                <div class="bg-slate-800/50 p-4 rounded-lg border border-sky-500/30">
+                    <h3 class="text-sky-400 font-bold mb-2">Unit Conversion</h3>
+                    <p class="text-xs text-slate-400">Force, stress, length, area, volume</p>
+                </div>
+                <div class="bg-slate-800/50 p-4 rounded-lg border border-sky-500/30">
+                    <h3 class="text-sky-400 font-bold mb-2">Bill of Quantities</h3>
+                    <p class="text-xs text-slate-400">Concrete, steel, formwork, earthwork</p>
+                </div>
+                <div class="bg-slate-800/50 p-4 rounded-lg border border-sky-500/30">
+                    <h3 class="text-sky-400 font-bold mb-2">Structural Analysis</h3>
+                    <p class="text-xs text-slate-400">Beams, trusses, load combinations</p>
+                </div>
+                <div class="bg-slate-800/50 p-4 rounded-lg border border-sky-500/30">
+                    <h3 class="text-sky-400 font-bold mb-2">RC & Steel Design</h3>
+                    <p class="text-xs text-slate-400">Beams, columns, slabs, connections</p>
+                </div>
+                <div class="bg-slate-800/50 p-4 rounded-lg border border-sky-500/30">
+                    <h3 class="text-sky-400 font-bold mb-2">Geotechnical</h3>
+                    <p class="text-xs text-slate-400">Bearing capacity, foundations, piles</p>
+                </div>
+                <div class="bg-slate-800/50 p-4 rounded-lg border border-sky-500/30">
+                    <h3 class="text-sky-400 font-bold mb-2">Hydraulics</h3>
+                    <p class="text-xs text-slate-400">Flow, pipes, drainage, tanks</p>
+                </div>
+                <div class="bg-slate-800/50 p-4 rounded-lg border border-sky-500/30">
+                    <h3 class="text-sky-400 font-bold mb-2">Highway & Survey</h3>
+                    <p class="text-xs text-slate-400">Sight distance, curves, leveling</p>
+                </div>
+                <div class="bg-slate-800/50 p-4 rounded-lg border border-sky-500/30">
+                    <h3 class="text-sky-400 font-bold mb-2">Quality Control</h3>
+                    <p class="text-xs text-slate-400">Mix design, strength conversion, stats</p>
+                </div>
+            </div>
+            
+            <button id="goToMenu" 
+                class="bg-sky-600 hover:bg-sky-500 text-white font-bold py-3 px-10 rounded-full text-lg transition-all duration-300 glow-border">
+                Enter Tool Suite <i class="fa fa-arrow-right ml-2"></i>
+            </button>
+            
+            <p class="mt-8 text-xs text-slate-500 italic">
+                ⚠️ For preliminary estimation only — final design to be checked by licensed engineer
+            </p>
+        </div>
+    </div>
+
+    <!-- Page 2: Icon Menu -->
+    <div id="menuPage" class="min-h-screen px-4 py-10 hidden">
+        <div class="max-w-6xl mx-auto">
+            <div class="flex items-center justify-between mb-10">
+                <h2 class="font-display text-2xl md:text-3xl text-sky-400 glow-text">
+                    Civil Engineering Tools
+                </h2>
+                <button id="backToLanding" class="text-slate-400 hover:text-white transition-colors">
+                    <i class="fa fa-arrow-left mr-1"></i> Back
+                </button>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
+                <!-- 1. Beam Analysis -->
+                <a href="#beam" class="bg-slate-800 rounded-xl p-5 flex flex-col items-center text-center card-hover border border-slate-700 hover:border-sky-500">
+                    <i class="fa fa-arrows-h text-3xl text-sky-400 mb-3"></i>
+                    <span class="font-semibold">Beam Analysis</span>
+                    <span class="text-xs text-slate-400 mt-1">SFD/BMD, Deflection</span>
+                </a>
+                
+                <!-- 2. Steel & Reinforcement -->
+                <a href="#steel" class="bg-slate-800 rounded-xl p-5 flex flex-col items-center text-center card-hover border border-slate-700 hover:border-sky-500">
+                    <i class="fa fa-th-large text-3xl text-sky-400 mb-3"></i>
+                    <span class="font-semibold">Steel & Rebar</span>
+                    <span class="text-xs text-slate-400 mt-1">Weight, Area, Spacing</span>
+                </a>
+                
+                <!-- 3. Unit Conversion -->
+                <a href="#conversion" class="bg-slate-800 rounded-xl p-5 flex flex-col items-center text-center card-hover border border-slate-700 hover:border-sky-500">
+                    <i class="fa fa-exchange text-3xl text-sky-400 mb-3"></i>
+                    <span class="font-semibold">Unit Conversion</span>
+                    <span class="text-xs text-slate-400 mt-1">Force, Stress, Length</span>
+                </a>
+                
+                <!-- 4. Section Properties -->
+                <a href="#section" class="bg-slate-800 rounded-xl p-5 flex flex-col items-center text-center card-hover border border-slate-700 hover:border-sky-500">
+                    <i class="fa fa-square-o text-3xl text-sky-400 mb-3"></i>
+                    <span class="font-semibold">Section Properties</span>
+                    <span class="text-xs text-slate-400 mt-1">I, S, r, Centroid</span>
+                </a>
+                
+                <!-- 5. Concrete & BOQ -->
+                <a href="#concrete" class="bg-slate-800 rounded-xl p-5 flex flex-col items-center text-center card-hover border border-slate-700 hover:border-sky-500">
+                    <i class="fa fa-cubes text-3xl text-sky-400 mb-3"></i>
+                    <span class="font-semibold">Concrete & BOQ</span>
+                    <span class="text-xs text-slate-400 mt-1">Volume, Cost, Materials</span>
+                </a>
+                
+                <!-- 6. RC Design -->
+                <a href="#rc" class="bg-slate-800 rounded-xl p-5 flex flex-col items-center text-center card-hover border border-slate-700 hover:border-sky-500">
+                    <i class="fa fa-building text-3xl text-sky-400 mb-3"></i>
+                    <span class="font-semibold">RC Design</span>
+                    <span class="text-xs text-slate-400 mt-1">Beam, Column, Slab</span>
+                </a>
+                
+                <!-- 7. Steel Structure -->
+                <a href="#steel-struct" class="bg-slate-800 rounded-xl p-5 flex flex-col items-center text-center card-hover border border-slate-700 hover:border-sky-500">
+                    <i class="fa fa-wrench text-3xl text-sky-400 mb-3"></i>
+                    <span class="font-semibold">Steel Structures</span>
+                    <span class="text-xs text-slate-400 mt-1">Sections, Connections</span>
+                </a>
+                
+                <!-- 8. Geotechnical -->
+                <a href="#geo" class="bg-slate-800 rounded-xl p-5 flex flex-col items-center text-center card-hover border border-slate-700 hover:border-sky-500">
+                    <i class="fa fa-mountain text-3xl text-sky-400 mb-3"></i>
+                    <span class="font-semibold">Geotechnical</span>
+                    <span class="text-xs text-slate-400 mt-1">Bearing, Foundations</span>
+                </a>
+                
+                <!-- 9. Hydraulics -->
+                <a href="#hydro" class="bg-slate-800 rounded-xl p-5 flex flex-col items-center text-center card-hover border border-slate-700 hover:border-sky-500">
+                    <i class="fa fa-tint text-3xl text-sky-400 mb-3"></i>
+                    <span class="font-semibold">Hydraulics</span>
+                    <span class="text-xs text-slate-400 mt-1">Flow, Pipes, Drainage</span>
+                </a>
+                
+                <!-- 10. Highway & Survey -->
+                <a href="#road" class="bg-slate-800 rounded-xl p-5 flex flex-col items-center text-center card-hover border border-slate-700 hover:border-sky-500">
+                    <i class="fa fa-road text-3xl text-sky-400 mb-3"></i>
+                    <span class="font-semibold">Highway & Survey</span>
+                    <span class="text-xs text-slate-400 mt-1">Curves, Levels</span>
+                </a>
+            </div>
+            
+            <div class="mt-10 p-4 bg-slate-800/50 rounded-lg border border-amber-500/30 text-center">
+                <p class="text-sm text-amber-300">
+                    <i class="fa fa-info-circle mr-1"></i> 
+                    Phase 1: Ready now — Unit conversion, BOQ, Sections, Steel weights<br>
+                    Phase 2–3: Under development — Beams, RC design, Geo, Hydraulics
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Navigation
+        const landingPage = document.getElementById('landingPage');
+        const menuPage = document.getElementById('menuPage');
+        const goToMenu = document.getElementById('goToMenu');
+        const backToLanding = document.getElementById('backToLanding');
+
+        goToMenu.addEventListener('click', () => {
+            landingPage.classList.add('hidden');
+            menuPage.classList.remove('hidden');
+        });
+
+        backToLanding.addEventListener('click', () => {
+            menuPage.classList.add('hidden');
+            landingPage.classList.remove('hidden');
+        });
+
+        // Store last visited page in localStorage
+        document.addEventListener('DOMContentLoaded', () => {
+            const lastPage = localStorage.getItem('lastPage');
+            if (lastPage === 'menu') {
+                landingPage.classList.add('hidden');
+                menuPage.classList.remove('hidden');
+            }
+        });
+
+        window.addEventListener('beforeunload', () => {
+            if (!menuPage.classList.contains('hidden')) {
+                localStorage.setItem('lastPage', 'menu');
+            } else {
+                localStorage.setItem('lastPage', 'landing');
+            }
+        });
+    </script>
+</body>
+</html>
