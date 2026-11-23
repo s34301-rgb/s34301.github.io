@@ -1,2291 +1,2241 @@
 <!doctype html>
 <html lang="th">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ระบบควบคุมหุ่นยนต์พ่นยาอัตโนมัติอัจฉริยะด้วย ESP32</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ระบบควบคุมหุ่นยนต์พ่นยาอัตโนมัติอัจฉริยะด้วย ESP32 (3D Digital Twin & MQTT Dashboard)</title>
+  <!-- Leaflet Map (Real Map Integration) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Three.js for 3D Simulation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <!-- Google Fonts: Prompt for crisp Thai/English UI -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/mqtt@5.3.5/dist/mqtt.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #f1f5f4;
-      --surface: #ffffff;
-      --surface-alt: #f8faf9;
-      --dark-panel: #0f241f;
-      --dark-card: #16302a;
-      --dark-border: #254b42;
-      --border: #d7e0dd;
-      --ink: #12211d;
-      --muted: #556963;
-      --brand: #0d7a5f;
-      --brand-hover: #09614b;
-      --brand-soft: #e6f5f0;
-      --accent: #0284c7;
-      --ok: #16a34a;
-      --ok-soft: #dcfce7;
-      --warn: #d97706;
-      --warn-soft: #fef3c7;
-      --danger: #dc2626;
-      --danger-hover: #b91c1c;
-      --danger-soft: #fee2e2;
-      --power: #b91c1c;
+      --bg: #0b0f17;
+      --surface: #131a26;
+      --surface-elevated: #1b2434;
+      --border: #28354a;
+      --border-light: #354660;
+      --ink: #f1f5f9;
+      --muted: #94a3b8;
+      --brand: #0ea5e9;
+      --brand-dark: #0284c7;
+      --accent: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --purple: #8b5cf6;
       --radius: 12px;
       --radius-sm: 8px;
-      --shadow: 0 1px 3px rgba(15, 36, 31, 0.07), 0 1px 2px rgba(15, 36, 31, 0.04);
-      --font: "IBM Plex Sans Thai", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      --font: 'Prompt', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --mono: 'JetBrains Mono', monospace;
     }
 
-    * {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: var(--font);
-      color: var(--ink);
       background: var(--bg);
-      line-height: 1.5;
-      -webkit-font-smoothing: antialiased;
+      color: var(--ink);
+      line-height: 1.45;
+      overflow-x: hidden;
     }
 
     /* Top Header */
     .topbar {
-      background: var(--dark-panel);
-      color: #f0fdf9;
-      border-bottom: 1px solid var(--dark-border);
-      position: sticky;
-      top: 0;
-      z-index: 30;
-    }
-
-    .topbar-inner {
-      max-width: 1360px;
-      margin: 0 auto;
+      background: rgba(19, 26, 38, 0.95);
+      border-bottom: 1px solid var(--border);
       padding: 12px 20px;
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      backdrop-filter: blur(8px);
     }
 
-    .brand-group {
+    .brand-block {
       display: flex;
       align-items: center;
       gap: 12px;
     }
 
-    .brand-badge {
+    .brand-icon {
       width: 42px;
       height: 42px;
       border-radius: 10px;
-      background: linear-gradient(135deg, #10b981, #047857);
-      display: grid;
-      place-items: center;
-      flex-shrink: 0;
-      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
-    }
-
-    .brand-title {
-      margin: 0;
-      font-size: 1.15rem;
-      font-weight: 700;
-      letter-spacing: -0.01em;
-      line-height: 1.25;
-    }
-
-    .brand-sub {
-      margin: 2px 0 0;
-      font-size: 0.78rem;
-      color: #99bfb5;
+      background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
       display: flex;
-      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 18px;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .brand-title h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      display: flex;
       align-items: center;
       gap: 8px;
+      flex-wrap: wrap;
     }
 
-    .sim-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
+    .badge-sim {
+      background: rgba(14, 165, 233, 0.16);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      font-size: 11px;
       padding: 2px 8px;
       border-radius: 999px;
-      font-size: 0.72rem;
-      font-weight: 600;
-      background: rgba(245, 158, 11, 0.18);
-      color: #fcd34d;
-      border: 1px solid rgba(245, 158, 11, 0.4);
+      font-weight: 500;
     }
 
-    .sim-pill.live {
-      background: rgba(22, 163, 74, 0.22);
-      color: #86efac;
-      border-color: rgba(22, 163, 74, 0.5);
+    .brand-title p {
+      margin: 2px 0 0;
+      font-size: 12px;
+      color: var(--muted);
     }
 
-    .header-controls {
+    .status-strip {
       display: flex;
-      flex-wrap: wrap;
       align-items: center;
       gap: 10px;
+      flex-wrap: wrap;
     }
 
-    /* Status LEDs Box in Header */
-    .led-cluster {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--dark-card);
-      border: 1px solid var(--dark-border);
-      padding: 6px 12px;
-      border-radius: var(--radius-sm);
-      font-size: 0.78rem;
-      color: #cbd5e1;
-    }
-
-    .led-dot {
-      width: 11px;
-      height: 11px;
-      border-radius: 50%;
-      background: #334155;
-      transition: all 0.2s ease;
-    }
-
-    .led-dot.green.on {
-      background: #22c55e;
-      box-shadow: 0 0 8px #22c55e;
-    }
-
-    .led-dot.amber.on {
-      background: #f59e0b;
-      box-shadow: 0 0 8px #f59e0b;
-    }
-
-    .led-dot.red.on {
-      background: #ef4444;
-      box-shadow: 0 0 10px #ef4444;
-    }
-
-    .conn-chip {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--dark-card);
-      border: 1px solid var(--dark-border);
-      padding: 6px 12px;
-      border-radius: var(--radius-sm);
-      font-size: 0.78rem;
-      font-family: var(--mono);
-      color: #d1fae5;
-    }
-
-    .signal-bars {
-      display: inline-flex;
-      align-items: flex-end;
-      gap: 2px;
-      height: 12px;
-    }
-
-    .signal-bars span {
-      width: 3px;
-      background: #22c55e;
-      border-radius: 1px;
-    }
-
-    .signal-bars span:nth-child(1) { height: 4px; }
-    .signal-bars span:nth-child(2) { height: 7px; }
-    .signal-bars span:nth-child(3) { height: 10px; }
-    .signal-bars span:nth-child(4) { height: 12px; }
-
-    .estop-btn {
-      font-family: var(--font);
-      font-weight: 700;
-      font-size: 0.85rem;
-      padding: 8px 16px;
-      border-radius: var(--radius-sm);
-      border: 2px solid #fca5a5;
-      background: var(--danger);
-      color: #ffffff;
-      cursor: pointer;
+    .pill {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      box-shadow: 0 2px 8px rgba(220, 38, 38, 0.45);
-      transition: transform 0.1s ease, background 0.15s ease;
+      padding: 6px 12px;
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 500;
     }
 
-    .estop-btn:hover {
-      background: var(--danger-hover);
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
     }
+    .dot.warn { background: var(--warning); box-shadow: 0 0 8px var(--warning); }
+    .dot.danger { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
 
-    .estop-btn:active {
-      transform: scale(0.97);
-    }
-
-    .estop-btn.latched {
-      background: #7f1d1d;
-      border-color: #ef4444;
-      animation: pulse-danger 1.2s infinite;
-    }
-
-    @keyframes pulse-danger {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.65); }
-      50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
-    }
-
-    /* Main Container */
-    .container {
-      max-width: 1360px;
+    /* Main Grid Layout */
+    .workspace {
+      max-width: 1600px;
       margin: 0 auto;
-      padding: 16px 20px 36px;
-      display: flex;
-      flex-direction: column;
+      padding: 16px;
+      display: grid;
+      grid-template-columns: 1fr 390px;
       gap: 16px;
     }
 
-    /* MQTT Realtime Dashboard Strip */
-    .telemetry-banner {
-      background: #10231f;
-      color: #ecfdf5;
-      border-radius: var(--radius);
-      padding: 14px 16px;
-      border: 1px solid var(--dark-border);
-      box-shadow: var(--shadow);
-    }
-
-    .telemetry-header {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      margin-bottom: 12px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.09);
-    }
-
-    .telemetry-title {
-      font-size: 0.86rem;
-      font-weight: 600;
-      color: #a7f3d0;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .tls-badge {
-      font-size: 0.74rem;
-      color: #93c5fd;
-      font-family: var(--mono);
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .telemetry-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-      gap: 10px;
-    }
-
-    .t-card {
-      background: #17322c;
-      border: 1px solid #264d44;
-      border-radius: var(--radius-sm);
-      padding: 10px 12px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      gap: 4px;
-    }
-
-    .t-label {
-      font-size: 0.74rem;
-      color: #9cb8b0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .t-value {
-      font-family: var(--mono);
-      font-size: 1.18rem;
-      font-weight: 600;
-      color: #ffffff;
-      letter-spacing: -0.02em;
-    }
-
-    .t-sub {
-      font-family: var(--mono);
-      font-size: 0.73rem;
-      color: #86efac;
-    }
-
-    .meter-bar {
-      height: 6px;
-      background: #0b1916;
-      border-radius: 999px;
-      overflow: hidden;
-      margin-top: 4px;
-    }
-
-    .meter-fill {
-      height: 100%;
-      background: #10b981;
-      border-radius: 999px;
-      transition: width 0.25s ease, background 0.25s ease;
-    }
-
-    .meter-fill.blue { background: #38bdf8; }
-    .meter-fill.warn { background: #f59e0b; }
-    .meter-fill.danger { background: #ef4444; }
-
-    /* Workspace 2-Column Grid */
-    .workspace-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 16px;
-    }
-
-    @media (min-width: 1024px) {
-      .workspace-grid {
-        grid-template-columns: 1.12fr 0.88fr;
+    @media (max-width: 1180px) {
+      .workspace {
+        grid-template-columns: 1fr;
       }
     }
 
-    .col-stack {
+    .left-column {
       display: flex;
       flex-direction: column;
       gap: 16px;
+      min-width: 0;
+    }
+
+    .right-column {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-width: 0;
     }
 
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 18px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
     }
 
     .card-header {
+      padding: 12px 16px;
+      background: rgba(27, 36, 52, 0.65);
+      border-bottom: 1px solid var(--border);
       display: flex;
-      flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
       gap: 8px;
-      margin-bottom: 14px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
     }
 
     .card-title {
-      margin: 0;
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--ink);
+      font-size: 14px;
+      font-weight: 600;
       display: flex;
       align-items: center;
       gap: 8px;
+      margin: 0;
     }
 
-    .hw-tag {
-      font-family: var(--mono);
-      font-size: 0.71rem;
-      font-weight: 500;
-      padding: 2px 8px;
-      border-radius: 999px;
-      background: var(--surface-alt);
-      border: 1px solid var(--border);
-      color: var(--muted);
-    }
-
-    /* Mode Segmented Switch */
-    .mode-switch {
-      display: inline-flex;
-      background: var(--surface-alt);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 3px;
-      gap: 4px;
-    }
-
-    .mode-btn {
-      font-family: var(--font);
-      font-size: 0.8rem;
-      font-weight: 600;
-      padding: 6px 12px;
-      border: none;
-      border-radius: 6px;
-      background: transparent;
-      color: var(--muted);
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-
-    .mode-btn.active {
-      background: var(--brand);
-      color: #ffffff;
-    }
-
-    /* Field GPS & Geofence Map */
-    .map-wrapper {
+    /* 3D Monitor Area */
+    .monitor-container {
       position: relative;
-      background: #132a1e;
-      border-radius: var(--radius-sm);
+      width: 100%;
+      height: 500px;
+      background: #06090e;
       overflow: hidden;
-      border: 1px solid #264b37;
-      height: 270px;
+      user-select: none;
     }
 
-    #fieldCanvas {
+    @media (max-width: 680px) {
+      .monitor-container {
+        height: 380px;
+      }
+    }
+
+    #main3dCanvas {
       width: 100%;
       height: 100%;
       display: block;
-      cursor: crosshair;
     }
 
-    .map-overlay-top {
+    /* Camera OSD (On-Screen Display) */
+    .osd-overlay {
       position: absolute;
-      top: 10px;
-      left: 10px;
-      right: 10px;
+      inset: 0;
+      pointer-events: none;
+      padding: 14px;
       display: flex;
-      flex-wrap: wrap;
+      flex-direction: column;
       justify-content: space-between;
+      font-family: var(--mono);
+    }
+
+    .osd-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .osd-badge-group {
+      display: flex;
+      flex-direction: column;
       gap: 6px;
+      background: rgba(9, 13, 22, 0.72);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      padding: 8px 12px;
+      border-radius: 8px;
+      backdrop-filter: blur(4px);
+      font-size: 12px;
+    }
+
+    .rec-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #f87171;
+      font-weight: 700;
+    }
+
+    .rec-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #ef4444;
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.2; }
+    }
+
+    /* 3D Minimap PiP inside Monitor */
+    .minimap-pip {
+      pointer-events: auto;
+      width: 185px;
+      height: 185px;
+      background: rgba(11, 15, 23, 0.85);
+      border: 2px solid var(--brand);
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+    }
+
+    @media (max-width: 680px) {
+      .minimap-pip {
+        width: 125px;
+        height: 125px;
+      }
+    }
+
+    #minimap3dCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .minimap-label {
+      position: absolute;
+      top: 6px;
+      left: 8px;
+      background: rgba(11, 15, 23, 0.8);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
       pointer-events: none;
     }
 
-    .map-chip {
-      background: rgba(15, 36, 31, 0.85);
-      color: #d1fae5;
-      border: 1px solid rgba(16, 185, 129, 0.35);
-      border-radius: 6px;
-      padding: 4px 8px;
-      font-family: var(--mono);
-      font-size: 0.72rem;
-    }
-
-    .map-toolbar {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      margin-top: 10px;
-    }
-
-    /* Buttons */
-    .btn {
-      font-family: var(--font);
-      font-size: 0.82rem;
-      font-weight: 600;
-      padding: 7px 13px;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border);
-      background: var(--surface);
+    .minimap-compass {
+      position: absolute;
+      bottom: 6px;
+      right: 8px;
+      font-size: 10px;
       color: var(--ink);
-      cursor: pointer;
-      display: inline-flex;
+      background: rgba(11, 15, 23, 0.8);
+      padding: 2px 6px;
+      border-radius: 4px;
+      pointer-events: none;
+    }
+
+    /* Crosshair / Reticle for 1st Person FPV */
+    .fpv-reticle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 120px;
+      height: 80px;
+      border: 1px dashed rgba(56, 189, 248, 0.45);
+      border-radius: 6px;
+      display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-      transition: background 0.15s ease, border-color 0.15s ease, transform 0.08s ease;
+    }
+    .fpv-reticle::before, .fpv-reticle::after {
+      content: '';
+      position: absolute;
+      background: rgba(16, 185, 129, 0.7);
+    }
+    .fpv-reticle::before { width: 16px; height: 2px; }
+    .fpv-reticle::after { width: 2px; height: 16px; }
+
+    .osd-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
-    .btn:hover {
-      background: var(--surface-alt);
-      border-color: #b7c6c1;
+    .lidar-hud {
+      background: rgba(9, 13, 22, 0.78);
+      border: 1px solid var(--border-light);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
-    .btn:active {
-      transform: translateY(1px);
-    }
-
-    .btn:focus-visible {
-      outline: 2px solid var(--brand);
-      outline-offset: 2px;
-    }
-
-    .btn-primary {
-      background: var(--brand);
-      border-color: var(--brand);
-      color: #ffffff;
-    }
-
-    .btn-primary:hover {
-      background: var(--brand-hover);
-      border-color: var(--brand-hover);
-    }
-
-    .btn-warn {
-      background: var(--warn-soft);
-      border-color: #fcd34d;
-      color: #92400e;
-    }
-
-    /* Drive Pad & Wheel Encoders */
-    .drive-layout {
+    /* Camera & Driving Controls Toolbar */
+    .control-bar {
+      padding: 14px 16px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
       display: grid;
-      grid-template-columns: 1fr;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: 16px;
       align-items: center;
     }
 
-    @media (min-width: 640px) {
-      .drive-layout {
-        grid-template-columns: 220px 1fr;
+    .btn-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-light);
+      background: var(--surface-elevated);
+      color: var(--ink);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .btn:hover {
+      background: #263349;
+      border-color: #475d7c;
+    }
+
+    .btn.active, .btn-primary {
+      background: var(--brand);
+      border-color: #38bdf8;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .btn-success {
+      background: rgba(16, 185, 129, 0.2);
+      border-color: var(--accent);
+      color: #34d399;
+    }
+    .btn-success.active {
+      background: var(--accent);
+      color: #06281e;
+      font-weight: 700;
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: var(--danger);
+      color: #f87171;
+    }
+    .btn-danger.active {
+      background: var(--danger);
+      color: #fff;
+      font-weight: 700;
+      box-shadow: 0 0 16px rgba(239, 68, 68, 0.55);
+    }
+
+    /* D-Pad & Manual Control Panel */
+    .manual-Mapping-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 900px) {
+      .manual-Mapping-grid {
+        grid-template-columns: 1fr;
       }
     }
 
-    .dpad {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
+    .dpad-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       gap: 8px;
-      max-width: 220px;
-      margin: 0 auto;
-      width: 100%;
+      padding: 12px;
+      background: rgba(11, 15, 23, 0.5);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+
+    .dpad-row {
+      display: flex;
+      gap: 8px;
     }
 
     .dpad-btn {
-      height: 54px;
+      width: 56px;
+      height: 50px;
       border-radius: 10px;
-      border: 1px solid var(--border);
-      background: var(--surface-alt);
+      font-weight: 700;
+      font-size: 15px;
+      background: var(--surface-elevated);
+      border: 1px solid var(--border-light);
       color: var(--ink);
-      font-family: var(--font);
-      font-weight: 600;
-      font-size: 0.78rem;
       cursor: pointer;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 2px;
       user-select: none;
-      transition: all 0.12s ease;
+      transition: transform 0.08s ease, background 0.12s;
     }
-
-    .dpad-btn kbd {
-      font-family: var(--mono);
-      font-size: 0.66rem;
+    .dpad-btn span {
+      font-size: 9px;
+      font-weight: 400;
       color: var(--muted);
     }
-
-    .dpad-btn:hover {
-      border-color: var(--brand);
-      background: var(--brand-soft);
-    }
-
-    .dpad-btn.active {
+    .dpad-btn:active, .dpad-btn.pressed {
       background: var(--brand);
-      border-color: var(--brand);
-      color: #ffffff;
-      transform: scale(0.97);
+      border-color: #7dd3fc;
+      color: #fff;
+      transform: scale(0.95);
+    }
+    .dpad-btn:active span, .dpad-btn.pressed span {
+      color: #e0f2fe;
     }
 
-    .dpad-btn.active kbd {
-      color: #d1fae5;
+    /* Real GIS Map (Leaflet) */
+    #realMap {
+      width: 100%;
+      height: 310px;
+      background: #0f172a;
+      z-index: 1;
     }
 
-    .dpad-btn.stop-center {
-      background: #fff1f2;
-      border-color: #fecdd3;
-      color: #be123c;
-    }
-
-    .dpad-btn.stop-center.active {
-      background: var(--danger);
-      color: #ffffff;
-    }
-
-    .sensor-mini-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
+    .map-footer {
+      padding: 10px 14px;
+      background: var(--surface-elevated);
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
       gap: 8px;
     }
 
-    .mini-stat {
-      background: var(--surface-alt);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 8px 10px;
+    /* Right Column: MQTT Realtime Dashboard (Exact match to poster) */
+    .mqtt-phone-frame {
+      background: #0d131d;
+      border: 2px solid #2b3950;
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
     }
 
-    .mini-stat-label {
-      font-size: 0.73rem;
+    .mqtt-header {
+      text-align: center;
+      padding-bottom: 10px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .mqtt-header h2 {
+      margin: 0;
+      font-size: 15px;
+      color: #4ade80;
+      font-weight: 600;
+    }
+    .mqtt-header span {
+      font-size: 11px;
       color: var(--muted);
+    }
+
+    .mqtt-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .mqtt-tile {
+      background: #161f2e;
+      border: 1px solid #263449;
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 82px;
+    }
+
+    .mqtt-tile.full-width {
+      grid-column: span 2;
+      min-height: auto;
+    }
+
+    .tile-label {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 500;
       display: flex;
       justify-content: space-between;
+      align-items: center;
     }
 
-    .mini-stat-val {
+    .tile-value {
       font-family: var(--mono);
-      font-size: 0.92rem;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--ink);
+      margin-top: 4px;
+    }
+
+    .tile-sub {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 2px;
+      font-family: var(--mono);
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: #0b0f17;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      transition: width 0.25s ease;
+    }
+
+    /* 7-Step Autonomous Operation Flow */
+    .flow-steps {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      padding: 14px;
+    }
+    @media (max-width: 1024px) {
+      .flow-steps {
+        grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+      }
+    }
+
+    .flow-step {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      font-size: 12px;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+    .flow-step.active {
+      border-color: var(--brand);
+      background: rgba(14, 165, 233, 0.14);
+      box-shadow: 0 0 12px rgba(14, 165, 233, 0.25);
+    }
+    .flow-step.fault {
+      border-color: var(--danger);
+      background: rgba(239, 68, 68, 0.16);
+    }
+    .step-num {
+      font-weight: 700;
+      color: #38bdf8;
+      font-size: 11px;
+      margin-bottom: 4px;
+      display: block;
+    }
+    .step-title {
       font-weight: 600;
       color: var(--ink);
-      margin-top: 2px;
+      margin-bottom: 4px;
+    }
+    .step-desc {
+      font-size: 11px;
+      color: var(--muted);
+      margin: 0;
+      padding-left: 14px;
     }
 
-    /* Sliders */
+    /* Hardware BOM & Architecture Accordion/Tabs */
+    .arch-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      padding: 14px;
+    }
+
+    .arch-box {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+    }
+    .arch-box h4 {
+      margin: 0 0 8px 0;
+      font-size: 13px;
+      color: #38bdf8;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .arch-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      font-size: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .arch-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 4px;
+      border-bottom: 1px dashed rgba(255,255,255,0.06);
+    }
+
+    .led-group {
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .led-bulb {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      opacity: 0.25;
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+    .led-bulb.on { opacity: 1; }
+    .led-red { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
+    .led-yellow { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
+    .led-green { background: #10b981; box-shadow: 0 0 8px #10b981; }
+
     .slider-row {
-      margin-top: 10px;
       display: flex;
       flex-direction: column;
       gap: 4px;
+      font-size: 12px;
     }
-
-    .slider-label {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.82rem;
-      font-weight: 600;
-    }
-
     input[type="range"] {
       width: 100%;
       accent-color: var(--brand);
       cursor: pointer;
     }
-
-    /* Actuator Toggle Rows */
-    .actuator-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .actuator-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 10px 12px;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border);
-      background: var(--surface-alt);
-    }
-
-    .actuator-info {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .actuator-name {
-      font-size: 0.88rem;
-      font-weight: 600;
-      color: var(--ink);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .actuator-desc {
-      font-size: 0.75rem;
-      color: var(--muted);
-    }
-
-    .switch-btn {
-      min-width: 78px;
-      padding: 7px 12px;
-      border-radius: 999px;
-      font-family: var(--mono);
-      font-size: 0.78rem;
-      font-weight: 600;
-      border: 1px solid var(--border);
-      background: #e2e8f0;
-      color: #334155;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-
-    .switch-btn.on {
-      background: var(--ok);
-      border-color: #15803d;
-      color: #ffffff;
-      box-shadow: 0 1px 6px rgba(22, 163, 74, 0.35);
-    }
-
-    .switch-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    /* Power Chain Diagram Pills */
-    .power-chain {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
-      gap: 8px;
-    }
-
-    .p-node {
-      border: 1px solid var(--border);
-      border-left: 3px solid var(--ok);
-      border-radius: var(--radius-sm);
-      padding: 8px 10px;
-      background: var(--surface-alt);
-    }
-
-    .p-node.off {
-      border-left-color: #94a3b8;
-      opacity: 0.72;
-    }
-
-    .p-node.fault {
-      border-left-color: var(--danger);
-      background: var(--danger-soft);
-    }
-
-    .p-node-title {
-      font-size: 0.76rem;
-      font-weight: 700;
-      color: var(--ink);
-    }
-
-    .p-node-sub {
-      font-family: var(--mono);
-      font-size: 0.72rem;
-      color: var(--muted);
-      margin-top: 2px;
-    }
-
-    /* 7-Step Autonomous Operation Flow */
-    .flow-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
-      gap: 10px;
-    }
-
-    .flow-step {
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 10px 12px;
-      background: var(--surface-alt);
-      position: relative;
-      transition: all 0.2s ease;
-    }
-
-    .flow-step.active {
-      border-color: var(--brand);
-      background: var(--brand-soft);
-      box-shadow: 0 0 0 2px rgba(13, 122, 95, 0.15);
-    }
-
-    .flow-step.fault-active {
-      border-color: var(--danger);
-      background: var(--danger-soft);
-    }
-
-    .flow-num {
-      font-family: var(--mono);
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: var(--brand);
-      margin-bottom: 3px;
-    }
-
-    .flow-step.fault-active .flow-num {
-      color: var(--danger);
-    }
-
-    .flow-name {
-      font-size: 0.84rem;
-      font-weight: 700;
-      color: var(--ink);
-      margin-bottom: 4px;
-    }
-
-    .flow-bullets {
-      margin: 0;
-      padding-left: 15px;
-      font-size: 0.73rem;
-      color: var(--muted);
-    }
-
-    /* MQTT Config & Console */
-    .mqtt-form {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-
-    .field-group {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .field-group label {
-      font-size: 0.76rem;
-      font-weight: 600;
-      color: var(--muted);
-    }
-
-    .field-group input {
-      font-family: var(--mono);
-      font-size: 0.8rem;
-      padding: 7px 10px;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--ink);
-    }
-
-    .field-group input:focus {
-      outline: 2px solid var(--brand);
-      border-color: transparent;
-    }
-
-    .console-box {
-      background: #0b1916;
-      color: #a7f3d0;
-      font-family: var(--mono);
-      font-size: 0.74rem;
-      padding: 10px 12px;
-      border-radius: var(--radius-sm);
-      height: 125px;
-      overflow-y: auto;
-      border: 1px solid var(--dark-border);
-      line-height: 1.55;
-    }
-
-    .log-line {
-      margin: 0 0 3px;
-      word-break: break-all;
-    }
-
-    .log-line .ts { color: #64748b; }
-    .log-line .topic { color: #38bdf8; }
-    .log-line .warn { color: #fbbf24; }
-    .log-line .err { color: #f87171; }
-
-    .status-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      padding: 2px 8px;
-      border-radius: 999px;
-    }
-
-    .status-pill.ok { background: var(--ok-soft); color: #166534; }
-    .status-pill.warn { background: var(--warn-soft); color: #92400e; }
-    .status-pill.danger { background: var(--danger-soft); color: #991b1b; }
   </style>
-</head>
+<style data-link-removed-style>a[data-link-removed],a[href*="zPythonSafez"]:not([onclick]){pointer-events:none!important;cursor:default!important;opacity:.6}</style></head>
 <body>
 
-  <!-- Top Control Bar -->
+  <!-- TOP HEADER -->
   <header class="topbar">
-    <div class="topbar-inner">
-      <div class="brand-group">
-        <div class="brand-badge" aria-hidden="true">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="11" width="18" height="7" rx="2"/>
-            <circle cx="7" cy="19" r="2"/>
-            <circle cx="17" cy="19" r="2"/>
-            <path d="M8 11V7a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v4"/>
-            <path d="M12 5V2"/>
-            <path d="M2 14h1M21 14h1"/>
-          </svg>
-        </div>
-        <div>
-          <h1 class="brand-title">หุ่นยนต์พ่นยาอัตโนมัติอัจฉริยะด้วย ESP32</h1>
-          <div class="brand-sub">
-            <span>ESP32 Dual-Core 240MHz • 4G/LTE + SIM • IP65+</span>
-            <span id="dataModeBadge" class="sim-pill">โหมดจำลองข้อมูล (Simulation ตามค่าในแผนภาพ)</span>
-          </div>
+    <div class="brand-block">
+      <div class="brand-icon">ESP32</div>
+      <div class="brand-title">
+        <h1>
+          หุ่นยนต์พ่นยาอัตโนมัติอัจฉริยะด้วย ESP32
+          <span class="badge-sim">3D Digital Twin &amp; Realtime Monitor</span>
+        </h1>
+        <p>ตรวจตำแหน่ง ปริมาณการฉีด แบตเตอรี่ และสถานะการทำงานแบบออนไลน์ (Secure MQTT Cloud + 4G/LTE)</p>
+      </div>
+    </div>
+
+    <div class="status-strip">
+      <div class="pill" title="สถานะไฟสัญญาณเตือน Status LEDs (แดง/เหลือง/เขียว)">
+        <span>Status LEDs:</span>
+        <div class="led-group">
+          <span id="ledRed" class="led-bulb led-red" title="Fault / E-Stop"></span>
+          <span id="ledYellow" class="led-bulb led-yellow" title="Spraying / Navigating"></span>
+          <span id="ledGreen" class="led-bulb led-green on" title="System Normal"></span>
         </div>
       </div>
-
-      <div class="header-controls">
-        <!-- Status LEDs (Green / Amber / Red) -->
-        <div class="led-cluster" title="Status LEDs ไฟสถานะบนกล่องควบคุมกันน้ำ IP65+">
-          <span>Status LEDs:</span>
-          <span id="ledGreen" class="led-dot green on" title="Normal / Ready"></span>
-          <span id="ledAmber" class="led-dot amber" title="Spraying / Warning"></span>
-          <span id="ledRed" class="led-dot red" title="Fault / E-Stop"></span>
-        </div>
-
-        <!-- 4G/LTE + Heartbeat -->
-        <div class="conn-chip" title="4G/LTE Modem + SIM & MQTT Heartbeat">
-          <div class="signal-bars" aria-hidden="true">
-            <span></span><span></span><span></span><span></span>
-          </div>
-          <span id="connNetText">4G LTE</span>
-          <span>•</span>
-          <span id="heartbeatText">HB: 3s</span>
-        </div>
-
-        <!-- Hardware/Software Emergency Stop -->
-        <button id="estopBtn" type="button" class="estop-btn">
-          <span>●</span>
-          <span id="estopBtnLabel">EMERGENCY STOP (หยุดฉุกเฉิน)</span>
-        </button>
+      <div class="pill">
+        <span class="dot" id="mqttDot"></span>
+        <span id="mqttStatusText">MQTT TLS/SSL: Connected</span>
       </div>
+      <button id="btnEstopTop" class="btn btn-danger" onclick="toggleEmergencyStop()">
+        🛑 Emergency Stop (หยุดฉุกเฉิน)
+      </button>
     </div>
   </header>
 
-  <main class="container">
+  <!-- MAIN WORKSPACE -->
+  <main class="workspace">
+    <!-- LEFT COLUMN: 3D MONITOR, CONTROLS, REAL GIS MAP, 7-STEP FLOW -->
+    <div class="left-column">
 
-    <!-- Row 1: MQTT Dashboard (Realtime Monitoring) matching the image -->
-    <section class="telemetry-banner" aria-label="MQTT Dashboard Realtime Monitoring">
-      <div class="telemetry-header">
-        <div class="telemetry-title">
-          <span>MQTT Dashboard (Realtime Monitoring)</span>
-          <span>— ตรวจตำแหน่ง ปริมาณการฉีด แบตเตอรี่ และสถานะการทำงานแบบออนไลน์</span>
-        </div>
-        <div class="tls-badge">
-          <span>🔒 Secure TLS/SSL Connection</span>
-          <span>•</span>
-          <span id="mqttBrokerState">SIMULATED BROKER</span>
-        </div>
-      </div>
-
-      <div class="telemetry-grid">
-        <!-- GPS Position -->
-        <div class="t-card">
-          <div class="t-label"><span>GPS Position (GNSS)</span><span id="gpsFixBadge">Fix: 3D</span></div>
-          <div class="t-value" id="latLonDisplay" style="font-size:0.96rem;">13.7563, 100.5018</div>
-          <div class="t-sub" id="geofenceStatus">Geofence: อยู่ในเขตแปลง</div>
-        </div>
-
-        <!-- Battery -->
-        <div class="t-card">
-          <div class="t-label"><span>Battery (12V Li-ion)</span><span id="inaCurrentText">4.8 A</span></div>
-          <div class="t-value"><span id="battPctText">76%</span> <span style="font-size:0.84rem;color:#9cb8b0;" id="battVoltText">(12.4V)</span></div>
-          <div class="meter-bar"><div id="battBar" class="meter-fill" style="width:76%;"></div></div>
-        </div>
-
-        <!-- Tank Level -->
-        <div class="t-card">
-          <div class="t-label"><span>Tank Level (ระดับน้ำยา)</span><span id="tankLiterText">6.3 L / 10 L</span></div>
-          <div class="t-value" id="tankPctText">63%</div>
-          <div class="meter-bar"><div id="tankBar" class="meter-fill blue" style="width:63%;"></div></div>
-        </div>
-
-        <!-- Flow Rate & Total Volume -->
-        <div class="t-card">
-          <div class="t-label"><span>Flow Rate (อัตราการไหล)</span><span>Water Flow Meter</span></div>
-          <div class="t-value"><span id="flowRateText">1.82</span> <span style="font-size:0.82rem;">L/min</span></div>
-          <div class="t-sub">Total Volume: <span id="totalVolText">12.45</span> L</div>
-        </div>
-
-        <!-- Pressure & Pump Status -->
-        <div class="t-card">
-          <div class="t-label"><span>Pressure (แรงดันท่อ)</span><span id="pumpStateChip">Pump: ON</span></div>
-          <div class="t-value"><span id="pressureText">2.35</span> <span style="font-size:0.82rem;">bar</span></div>
-          <div class="t-sub" id="valveStateSub">Solenoid Valve: OPEN</div>
-        </div>
-
-        <!-- Speed & Motor Status -->
-        <div class="t-card">
-          <div class="t-label"><span>Speed (ความเร็วรถ)</span><span>4x Encoders</span></div>
-          <div class="t-value"><span id="speedText">3.6</span> <span style="font-size:0.82rem;">km/h</span></div>
-          <div class="t-sub" id="motorStatusText">Motor L: OK • R: OK</div>
-        </div>
-
-        <!-- Alarms / Faults -->
-        <div class="t-card">
-          <div class="t-label"><span>Alarms / Faults</span><span>Safety</span></div>
-          <div class="t-value" id="alarmMainText" style="font-size:1rem;color:#4ade80;">✓ No Fault</div>
-          <div class="t-sub" id="alarmSubText">ระบบปกติ พร้อมทำงาน</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Main 2-Column Workspace -->
-    <div class="workspace-grid">
-
-      <!-- Left Column: Navigation, Geofence Map & Dual Motor Drive -->
-      <div class="col-stack">
-
-        <!-- GPS Geofence & Autonomous Navigation Canvas -->
-        <section class="card">
-          <div class="card-header">
-            <h2 class="card-title">
-              แผนที่พิกัดแปลง &amp; เซนเซอร์นำทาง (GPS + IMU + LiDAR/ToF)
-            </h2>
-            <div class="mode-switch" role="group" aria-label="โหมดการควบคุมรถ">
-              <button type="button" id="modeManualBtn" class="mode-btn active">บังคับด้วยมือ (Manual RC)</button>
-              <button type="button" id="modeAutoBtn" class="mode-btn">อัตโนมัติ (Autonomous)</button>
-            </div>
+      <!-- 1. REALTIME CAMERA & 3D SIMULATION MONITOR -->
+      <section class="card">
+        <div class="card-header">
+          <h2 class="card-title">
+            📹 จอมอนิเตอร์ภาพจากกล้องหุ่นยนต์แบบเรียลไทม์ &amp; จำลอง 3 มิติ (1st / 3rd Person + 3D Minimap)
+          </h2>
+          <div class="btn-group">
+            <button id="btnCamFPV" class="btn" onclick="setCameraMode('fpv')">
+              👁️ มุมมองบุคคลที่ 1 (FPV กล้องหน้ารถ)
+            </button>
+            <button id="btnCamTPS" class="btn active" onclick="setCameraMode('tps')">
+              🚜 มุมมองบุคคลที่ 3 (Follow Cam)
+            </button>
+            <button id="btnCamFree" class="btn" onclick="setCameraMode('orbit')">
+              🔄 มุมมองอิสระรอบคัน (Inspect)
+            </button>
           </div>
+        </div>
 
-          <div class="map-wrapper">
-            <canvas id="fieldCanvas" width="680" height="270"></canvas>
-            <div class="map-overlay-top">
-              <div class="map-chip" id="imuOverlayChip">IMU Yaw: 90° | Pitch: 0.4° | Roll: -0.2°</div>
-              <div class="map-chip" id="lidarOverlayChip">LiDAR/ToF หน้า: 320 cm (ปลอดภัย)</div>
-            </div>
-          </div>
+        <div class="monitor-container">
+          <canvas id="main3dCanvas"></canvas>
 
-          <div class="map-toolbar">
-            <div style="font-size:0.78rem;color:var(--muted);">
-              คลิกบนพื้นที่แปลงในกรอบ Geofence เพื่อเพิ่มจุดนำทาง (Waypoints) หรือทดสอบสิ่งกีดขวาง
-            </div>
-            <div style="display:flex;flex-wrap:wrap;gap:6px;">
-              <button type="button" id="toggleObstacleBtn" class="btn btn-warn">จำลองสิ่งกีดขวาง (LiDAR)</button>
-              <button type="button" id="clearTrailBtn" class="btn">ล้างแนวพ่นยา</button>
-              <button type="button" id="resetPosBtn" class="btn">กลับจุดเริ่มต้น</button>
-            </div>
-          </div>
-        </section>
+          <!-- On-Screen Display (HUD) -->
+          <div class="osd-overlay">
+            <div class="osd-top">
+              <div class="osd-badge-group">
+                <div class="rec-indicator">
+                  <span class="rec-dot"></span> LIVE CAM • ESP32 FPV STREAM (30 FPS)
+                </div>
+                <div id="osdViewLabel">MODE: 3RD PERSON FOLLOW VIEW</div>
+                <div id="osdHeading">IMU YAW: 0.0° | PITCH: 0.2° | ROLL: -0.1°</div>
+                <div id="osdWheelEncoders">WHEEL ENCODERS (4x): FL 42 RPM | FR 42 RPM</div>
+              </div>
 
-        <!-- Manual RC Control & 4x Wheel Encoders / Dual Motor Driver -->
-        <section class="card">
-          <div class="card-header">
-            <h2 class="card-title">ควบคุมการขับเคลื่อน 4 ล้อ (Dual Motor Driver &amp; Wheel Encoders)</h2>
-            <span class="hw-tag">โครงท่อเหล็กแดง • ล้อยาง 4 ล้อ</span>
-          </div>
-
-          <div class="drive-layout">
-            <!-- D-Pad -->
-            <div>
-              <div class="dpad" aria-label="ปุ่มบังคับทิศทางรถ">
-                <button type="button" class="dpad-btn" data-drive="spin-left">หมุนซ้าย<kbd>Q</kbd></button>
-                <button type="button" class="dpad-btn" data-drive="forward">เดินหน้า<kbd>W / ↑</kbd></button>
-                <button type="button" class="dpad-btn" data-drive="spin-right">หมุนขวา<kbd>E</kbd></button>
-                <button type="button" class="dpad-btn" data-drive="left">เลี้ยวซ้าย<kbd>A / ←</kbd></button>
-                <button type="button" class="dpad-btn stop-center active" data-drive="stop">หยุดรถ<kbd>Space</kbd></button>
-                <button type="button" class="dpad-btn" data-drive="right">เลี้ยวขวา<kbd>D / →</kbd></button>
-                <div></div>
-                <button type="button" class="dpad-btn" data-drive="backward">ถอยหลัง<kbd>S / ↓</kbd></button>
-                <div></div>
+              <!-- 3D Minimap Picture-in-Picture -->
+              <div class="minimap-pip" title="แผนที่จำลองแบบ 3 มิติขนาดย่อ (3D Overhead Radar)">
+                <canvas id="minimap3dCanvas"></canvas>
+                <div class="minimap-label">🗺️ 3D MINIMAP</div>
+                <div class="minimap-compass" id="minimapStats">Coverage: 0%</div>
               </div>
             </div>
 
-            <!-- Encoders & Sensors Readout -->
-            <div>
-              <div class="sensor-mini-grid">
-                <div class="mini-stat">
-                  <div class="mini-stat-label"><span>Wheel Encoders หน้า (FL / FR)</span><span>RPM</span></div>
-                  <div class="mini-stat-val" id="encFrontText">96 / 96 RPM</div>
-                </div>
-                <div class="mini-stat">
-                  <div class="mini-stat-label"><span>Wheel Encoders หลัง (RL / RR)</span><span>RPM</span></div>
-                  <div class="mini-stat-val" id="encRearText">96 / 96 RPM</div>
-                </div>
-                <div class="mini-stat">
-                  <div class="mini-stat-label"><span>Dual Motor Driver (L / R)</span><span>PWM</span></div>
-                  <div class="mini-stat-val" id="pwmDriverText">L: 60% | R: 60%</div>
-                </div>
-                <div class="mini-stat">
-                  <div class="mini-stat-label"><span>ระยะทางสะสม (Odometry)</span><span>m</span></div>
-                  <div class="mini-stat-val" id="odometryText">142.8 m</div>
-                </div>
-              </div>
+            <!-- Reticle shown in FPV mode -->
+            <div id="fpvReticle" class="fpv-reticle" style="display:none;"></div>
 
+            <div class="osd-bottom">
+              <div class="lidar-hud">
+                <span>📡 <strong>LiDAR / ToF / Ultrasonic:</strong> <span id="hudObstacleDist" style="color:#4ade80;">Clear (4.80 m)</span></span>
+                <span>|</span>
+                <span>💦 <strong>หัวฉีดทองเหลือง + พัดลมคู่:</strong> <span id="hudSprayState" style="color:#38bdf8;">ON (ฉีดพ่นปกติ)</span></span>
+              </div>
+              <div class="lidar-hud">
+                <span>💾 <strong>MicroSD Logger:</strong> <span id="hudSdLogger">LOGGING (10 Hz)</span></span>
+                <span>|</span>
+                <span>🔔 <strong>Buzzer:</strong> <span id="hudBuzzer">SILENT</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Toolbar for Operation Mode & Spray System -->
+        <div class="control-bar">
+          <div>
+            <div style="font-size:12px; color:var(--muted); margin-bottom:6px;">โหมดการขับเคลื่อน (Navigation &amp; Control Mode)</div>
+            <div class="btn-group">
+              <button id="btnModeManual" class="btn" onclick="setDriveMode('manual')">
+                🕹️ บังคับเอง (Manual RC)
+              </button>
+              <button id="btnModeAuto" class="btn active" onclick="setDriveMode('auto')">
+                🤖 อัตโนมัติตามแปลง (Autonomous GPS)
+              </button>
+              <button class="btn" onclick="resetSimulation()">
+                ♻️ รีเซ็ตตำแหน่ง &amp; เติมน้ำยา
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <div style="font-size:12px; color:var(--muted); margin-bottom:6px;">ระบบปั๊ม 12V + โซลินอยด์วาล์ว + พัดลม DIY (Sprayer Control)</div>
+            <div class="btn-group">
+              <button id="btnSprayToggle" class="btn btn-success active" onclick="toggleSprayer()">
+                💦 ปั๊มน้ำยา + โซลินอยด์วาล์ว: เปิด (ON)
+              </button>
+              <button id="btnFanToggle" class="btn active" onclick="toggleFans()">
+                🌀 พัดลมคู่ DIY: เปิด (ON)
+              </button>
+            </div>
+          </div>
+
+          <div class="slider-row">
+            <div style="display:flex; justify-content:space-between;">
+              <span>เป้าหมายอัตราการไหล (Target Flow Rate):</span>
+              <strong id="targetFlowLabel" style="color:#38bdf8;">1.82 L/min (2.35 bar)</strong>
+            </div>
+            <input type="range" id="flowSlider" min="0.8" max="3.0" step="0.02" value="1.82" oninput="updateTargetFlow(this.value)" />
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. MANUAL CONTROL & REAL GIS MAP (LEAFLET) -->
+      <div class="manual-Mapping-grid">
+        <!-- Manual D-Pad & Hardware Actuators -->
+        <section class="card">
+          <div class="card-header">
+            <h3 class="card-title">🕹️ แผงบังคับหุ่นยนต์ &amp; จำลองสถานการณ์หน้างาน</h3>
+            <span style="font-size:11px; color:var(--muted);">กดปุ่มบนหน้าจอ หรือปุ่ม W A S D / ลูกศร</span>
+          </div>
+          <div style="padding:14px; display:grid; grid-template-columns: auto 1fr; gap:16px; align-items:center;">
+            <div class="dpad-wrapper">
+              <div class="dpad-row">
+                <button class="dpad-btn" id="keyW"
+                  onmousedown="startKey('w')" onmouseup="stopKey('w')" onmouseleave="stopKey('w')"
+                  ontouchstart="startKey('w'); event.preventDefault();" ontouchend="stopKey('w')">
+                  ▲<span>เดินหน้า (W)</span>
+                </button>
+              </div>
+              <div class="dpad-row">
+                <button class="dpad-btn" id="keyA"
+                  onmousedown="startKey('a')" onmouseup="stopKey('a')" onmouseleave="stopKey('a')"
+                  ontouchstart="startKey('a'); event.preventDefault();" ontouchend="stopKey('a')">
+                  ◀<span>เลี้ยวซ้าย (A)</span>
+                </button>
+                <button class="dpad-btn" id="keyS"
+                  onmousedown="startKey('s')" onmouseup="stopKey('s')" onmouseleave="stopKey('s')"
+                  ontouchstart="startKey('s'); event.preventDefault();" ontouchend="stopKey('s')">
+                  ▼<span>ถอยหลัง (S)</span>
+                </button>
+                <button class="dpad-btn" id="keyD"
+                  onmousedown="startKey('d')" onmouseup="stopKey('d')" onmouseleave="stopKey('d')"
+                  ontouchstart="startKey('d'); event.preventDefault();" ontouchend="stopKey('d')">
+                  ▶<span>เลี้ยวขวา (D)</span>
+                </button>
+              </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:10px;">
               <div class="slider-row">
-                <div class="slider-label">
-                  <label for="targetSpeedSlider">ความเร็วเป้าหมาย (Target Speed)</label>
-                  <span style="font-family:var(--mono);" id="targetSpeedLabel">3.6 km/h</span>
+                <div style="display:flex; justify-content:space-between;">
+                  <span>ความเร็วเป้าหมาย (Dual Motor Driver L/R):</span>
+                  <strong id="targetSpeedLabel" style="color:#4ade80;">3.6 km/h</strong>
                 </div>
-                <input type="range" id="targetSpeedSlider" min="0.6" max="6.0" step="0.2" value="3.6">
+                <input type="range" id="speedSlider" min="1.2" max="6.0" step="0.2" value="3.6" oninput="updateTargetSpeed(this.value)" />
+              </div>
+
+              <div style="border-top:1px solid var(--border); padding-top:10px;">
+                <div style="font-size:12px; color:var(--muted); margin-bottom:6px;">ทดสอบเซนเซอร์ความปลอดภัย (Safety &amp; Fault Simulation):</div>
+                <div class="btn-group">
+                  <button class="btn" onclick="spawnTestObstacle()">
+                    🚧 วางสิ่งกีดขวางหน้าหุ่น (ทดสอบ LiDAR/ToF)
+                  </button>
+                  <button class="btn" onclick="refillTank()">
+                    🚰 เติมน้ำยาเต็มถัง (10.0 L)
+                  </button>
+                  <button class="btn" onclick="rechargeBattery()">
+                    🔋 ชาร์จแบต 12V Li-ion (100%)
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-      </div>
-
-      <!-- Right Column: Sprayer System, 12V Power Bus & Auxiliary -->
-      <div class="col-stack">
-
-        <!-- Sprayer Control (MOSFET/Relay Driver: 12V Pump, Solenoid Valve, DIY Fans & Brass Nozzles) -->
+        <!-- Real World Map (Leaflet GPS/GNSS) -->
         <section class="card">
           <div class="card-header">
-            <h2 class="card-title">ควบคุมระบบฉีดพ่นสารเคมี (MOSFET / Relay Driver)</h2>
-            <span class="hw-tag">12V Pump + Solenoid + Brass Nozzles</span>
-          </div>
-
-          <div class="actuator-list">
-            <!-- Contactor Main Power -->
-            <div class="actuator-item">
-              <div class="actuator-info">
-                <div class="actuator-name">Contactor (Main Power Switch 12V)</div>
-                <div class="actuator-desc">สวิตช์ตัดต่อกำลังไฟหลักให้ชุดขับเคลื่อนและปั๊มฉีดพ่น</div>
-              </div>
-              <button type="button" id="contactorToggle" class="switch-btn on">ON</button>
-            </div>
-
-            <!-- 12V Water Pump -->
-            <div class="actuator-item">
-              <div class="actuator-info">
-                <div class="actuator-name">12V Diaphragm Water Pump (ปั๊มน้ำยา)</div>
-                <div class="actuator-desc">สร้างแรงดันในท่อสะอาด (Clean pipe) ไปยังหัวฉีดทองเหลือง</div>
-              </div>
-              <button type="button" id="pumpToggle" class="switch-btn on">ON</button>
-            </div>
-
-            <!-- Solenoid Valve -->
-            <div class="actuator-item">
-              <div class="actuator-info">
-                <div class="actuator-name">Solenoid Valve 12V (วาล์วเปิด-ปิดน้ำยา)</div>
-                <div class="actuator-desc">สั่งเปิด-ปิดการไหลผ่านมาตรวัด Water Flow Meter</div>
-              </div>
-              <button type="button" id="valveToggle" class="switch-btn on">OPEN</button>
-            </div>
-
-            <!-- DIY Fans + Brass Nozzles -->
-            <div class="actuator-item">
-              <div class="actuator-info">
-                <div class="actuator-name">DIY Fans &amp; Brass Nozzles (พัดลมช่วยกระจายละออง)</div>
-                <div class="actuator-desc">พัดลมคู่ท้ายรถช่วยส่งละอองสารเคมีจากหัวฉีดทองเหลือง</div>
-              </div>
-              <button type="button" id="fanToggle" class="switch-btn on">ON</button>
+            <h3 class="card-title">🌍 แผนที่จริง GPS/GNSS (Real Satellite/OSM Map &amp; Geofence)</h3>
+            <div class="btn-group">
+              <button class="btn" style="padding:4px 8px; font-size:11px;" onclick="centerRealMap()">🎯 จับตำแหน่งหุ่นยนต์</button>
+              <button class="btn" style="padding:4px 8px; font-size:11px;" onclick="toggleMapLayer()">🛰️ สลับแผนที่ดาวเทียม/ถนน</button>
             </div>
           </div>
-
-          <div class="slider-row" style="margin-top:14px;">
-            <div class="slider-label">
-              <label for="targetFlowSlider">อัตราการฉีดเป้าหมาย (Target Flow Rate — Auto Verify)</label>
-              <span style="font-family:var(--mono);" id="targetFlowLabel">1.82 L/min</span>
-            </div>
-            <input type="range" id="targetFlowSlider" min="0.50" max="3.20" step="0.02" value="1.82">
-          </div>
-
-          <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;margin-top:12px;">
-            <span id="flowLoopBadge" class="status-pill ok">✓ ควบคุมอัตราการไหลอัตโนมัติ (Flow &amp; Pressure ปกติ)</span>
-            <button type="button" id="refillTankBtn" class="btn">เติมน้ำยาเต็มถัง (10.0 L)</button>
+          <div id="realMap"></div>
+          <div class="map-footer">
+            <span>📍 <strong>พิกัดแปลงเกษตร:</strong> <span id="mapCoordText">Lat: 13.756900, Lon: 100.501800 (Fix: 3D RTK)</span></span>
+            <span style="color:#38bdf8;">คลิกบนแผนที่จริงเพื่อปักหมุด Waypoint ให้หุ่นวิ่งไปหาได้</span>
           </div>
         </section>
-
-        <!-- Power & Electrical System + Auxiliary & Feedback -->
-        <section class="card">
-          <div class="card-header">
-            <h2 class="card-title">ระบบไฟ 12V DC &amp; อุปกรณ์เสริม (Power &amp; Auxiliary)</h2>
-            <span class="hw-tag">BMS • INA226 • Buck 12V→5V • MicroSD</span>
-          </div>
-
-          <div class="power-chain" style="margin-bottom:14px;">
-            <div class="p-node" id="pNodeBatt">
-              <div class="p-node-title">Battery + BMS</div>
-              <div class="p-node-sub" id="pSubBatt">12.4V • ปกติ</div>
-            </div>
-            <div class="p-node" id="pNodeFuse">
-              <div class="p-node-title">Main Fuse</div>
-              <div class="p-node-sub" id="pSubFuse">30A • ปกติ</div>
-            </div>
-            <div class="p-node" id="pNodeIna">
-              <div class="p-node-title">INA219 / INA226</div>
-              <div class="p-node-sub" id="pSubIna">59.5 W (4.8 A)</div>
-            </div>
-            <div class="p-node" id="pNodeBuck">
-              <div class="p-node-title">Buck 12V → 5V</div>
-              <div class="p-node-sub">5.02V (ESP32 + Sensors)</div>
-            </div>
-          </div>
-
-          <div class="actuator-list">
-            <div class="actuator-item">
-              <div class="actuator-info">
-                <div class="actuator-name">MicroSD Logger (บันทึกข้อมูลลงการ์ด SD)</div>
-                <div class="actuator-desc" id="sdLogSub">กำลังบันทึกทุก 3 วินาที • บันทึกแล้ว 48 รายการ</div>
-              </div>
-              <button type="button" id="sdToggle" class="switch-btn on">REC</button>
-            </div>
-
-            <div class="actuator-item">
-              <div class="actuator-info">
-                <div class="actuator-name">Buzzer (สัญญาณเสียงเตือน &amp; FPV Status)</div>
-                <div class="actuator-desc">แจ้งเตือนอัตโนมัติเมื่อเกิด Fault / น้ำยาใกล้หมด / พบสิ่งกีดขวาง</div>
-              </div>
-              <div style="display:flex;gap:6px;">
-                <button type="button" id="testBuzzerBtn" class="btn">ทดสอบเสียง</button>
-                <button type="button" id="buzzerMuteToggle" class="switch-btn on">AUTO</button>
-              </div>
-            </div>
-          </div>
-        </section>
-
       </div>
+
+      <!-- 3. 7-STEP AUTONOMOUS OPERATION FLOW (Exact match to poster bottom-right) -->
+      <section class="card">
+        <div class="card-header">
+          <h3 class="card-title">🔄 ขั้นตอนการทำงานอัตโนมัติ 7 ขั้นตอน (Autonomous Operation Flow)</h3>
+          <span id="currentStepBadge" class="badge-sim">สถานะปัจจุบัน: ขั้นตอนที่ 4 ฉีดพ่นตามเป้าหมาย</span>
+        </div>
+        <div class="flow-steps">
+          <div class="flow-step" id="step1">
+            <span class="step-num">1. วางแผนงาน (Plan)</span>
+            <ul class="step-desc">
+              <li>อัปโหลดแผนที่แปลง</li>
+              <li>ตั้งค่าเป้าหมาย</li>
+              <li>Geofence กรอบแปลง</li>
+            </ul>
+          </div>
+          <div class="flow-step" id="step2">
+            <span class="step-num">2. นำทาง (Navigate)</span>
+            <ul class="step-desc">
+              <li>ระบุตำแหน่ง GPS</li>
+              <li>IMU + Wheel Encoders</li>
+              <li>หลีกเลี่ยงสิ่งกีดขวาง</li>
+            </ul>
+          </div>
+          <div class="flow-step" id="step3">
+            <span class="step-num">3. ตรวจสอบความปลอดภัย</span>
+            <ul class="step-desc">
+              <li>ตรวจ E-Stop</li>
+              <li>ระดับน้ำยา / แบตเตอรี่</li>
+              <li>สัญญาณและเซนเซอร์</li>
+            </ul>
+          </div>
+          <div class="flow-step active" id="step4">
+            <span class="step-num">4. ฉีดพ่นตามเป้าหมาย</span>
+            <ul class="step-desc">
+              <li>เปิดปั๊มและวาล์ว</li>
+              <li>ควบคุมอัตราการไหลตามเป้าหมาย</li>
+            </ul>
+          </div>
+          <div class="flow-step" id="step5">
+            <span class="step-num">5. ตรวจสอบการไหล</span>
+            <ul class="step-desc">
+              <li>ตรวจ Flow &amp; Pressure</li>
+              <li>ปรับอัตโนมัติถ้าเบี่ยงเบน</li>
+            </ul>
+          </div>
+          <div class="flow-step" id="step6">
+            <span class="step-num">6. บันทึกข้อมูล (Log)</span>
+            <ul class="step-desc">
+              <li>บันทึกลง microSD</li>
+              <li>ส่งขึ้น Cloud (MQTT)</li>
+            </ul>
+          </div>
+          <div class="flow-step" id="step7">
+            <span class="step-num">7. กรณีผิดปกติ (Fault)</span>
+            <ul class="step-desc">
+              <li>หยุดพ่นอัตโนมัติ</li>
+              <li>แจ้งเตือน Buzzer/LED</li>
+              <li>หยุด/ย้อนกลับ</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. HARDWARE ARCHITECTURE & SYSTEM COMPONENTS (From Poster) -->
+      <section class="card">
+        <div class="card-header">
+          <h3 class="card-title">🛠️ ส่วนประกอบและสถาปัตยกรรมระบบ (System Components &amp; Architecture จากต้นแบบ)</h3>
+          <span style="font-size:12px; color:var(--muted);">จำลองการทำงานครบทุกโมดูลในหุ่นยนต์ 3 มิติ</span>
+        </div>
+        <div class="arch-grid">
+          <div class="arch-box">
+            <h4>โครงสร้างและการฉีดพ่น (Mechanical &amp; Sprayer)</h4>
+            <ul class="arch-list">
+              <li><span>โครงฐานท่อเหล็กแดง + ล้อยาง 4 ล้อ</span> <strong style="color:#4ade80;">OK</strong></li>
+              <li><span>ถังน้ำยา DIY + ขายึด (10 ลิตร)</span> <strong id="hwTankText">6.30 L</strong></li>
+              <li><span>ปั๊มน้ำ 12V Diaphragm + โซลินอยด์วาล์ว</span> <strong id="hwPumpText" style="color:#4ade80;">ON</strong></li>
+              <li><span>พัดลมคู่ DIY + หัวฉีดทองเหลือง</span> <strong id="hwFanText" style="color:#4ade80;">ACTIVE</strong></li>
+            </ul>
+          </div>
+
+          <div class="arch-box">
+            <h4>เซนเซอร์นำทางและวัดค่า (Sensors Input)</h4>
+            <ul class="arch-list">
+              <li><span>GPS/GNSS + IMU (6/9 DOF)</span> <strong style="color:#38bdf8;">3D Fix</strong></li>
+              <li><span>LiDAR / ToF / Ultrasonic กันชน</span> <strong id="hwLidarText" style="color:#4ade80;">Clear</strong></li>
+              <li><span>Wheel Encoders (วัดรอบล้อทั้ง 4 ล้อ)</span> <strong id="hwEncoderText">42 RPM</strong></li>
+              <li><span>Water Flow Meter + Pressure Sensor</span> <strong id="hwFlowPressText">1.82L/m | 2.35bar</strong></li>
+            </ul>
+          </div>
+
+          <div class="arch-box">
+            <h4>ระบบไฟและพลังงาน (Power &amp; Electrical)</h4>
+            <ul class="arch-list">
+              <li><span>Battery Pack 12V Li-ion + BMS</span> <strong id="hwBattVolt">12.4 V (76%)</strong></li>
+              <li><span>Main Fuse + Contactor Switch</span> <strong id="hwContactor" style="color:#4ade80;">CLOSED</strong></li>
+              <li><span>INA219 / INA226 วัดแรงดัน/กระแส</span> <strong id="hwCurrent">4.8 A</strong></li>
+              <li><span>DC-DC Buck (12V→5V) + MOSFET Driver</span> <strong style="color:#4ade80;">5.01 V</strong></li>
+            </ul>
+          </div>
+
+          <div class="arch-box">
+            <h4>สมองกลและการสื่อสาร (Controller &amp; Comms)</h4>
+            <ul class="arch-list">
+              <li><span>ESP32 Dev Module (Dual Core 240MHz)</span> <strong style="color:#4ade80;">RUNNING</strong></li>
+              <li><span>4G/LTE Modem + SIM + FPV Antenna</span> <strong style="color:#4ade80;">RSSI -63dBm</strong></li>
+              <li><span>MicroSD Logger + กล่องกันน้ำ IP65+</span> <strong id="hwSdCount">1,420 rows</strong></li>
+              <li><span>ปุ่มหยุดฉุกเฉิน (Emergency Stop)</span> <strong id="hwEstopState" style="color:#4ade80;">NORMAL</strong></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
     </div>
 
-    <!-- Bottom Row 1: 7-Step Autonomous Operation Flow -->
-    <section class="card" aria-label="ขั้นตอนการทำงานอัตโนมัติ 7 ขั้นตอน">
-      <div class="card-header">
-        <h2 class="card-title">ขั้นตอนการทำงานอัตโนมัติ (Autonomous Operation Flow 7 ขั้นตอน)</h2>
-        <span id="autoFlowBadge" class="status-pill ok">สถานะปัจจุบัน: ขั้นตอนที่ 4 — ฉีดพ่นตามเป้าหมาย</span>
+    <!-- RIGHT COLUMN: MQTT REALTIME MONITORING DASHBOARD (Exact match to poster) -->
+    <aside class="right-column">
+      <div class="mqtt-phone-frame">
+        <div class="mqtt-header">
+          <h2>MQTT Dashboard (Realtime Monitoring)</h2>
+          <span>Secure MQTT Cloud Broker • TLS/SSL Encrypted</span>
+        </div>
+
+        <div class="mqtt-grid">
+          <!-- GPS Position -->
+          <div class="mqtt-tile">
+            <div class="tile-label">
+              <span>GPS Position</span>
+              <span style="color:#38bdf8;">🛰️ GNSS</span>
+            </div>
+            <div class="tile-sub" id="mqttLat">Lat: 13.7569</div>
+            <div class="tile-sub" id="mqttLon">Lon: 100.5018</div>
+            <div class="tile-sub" style="color:#4ade80;">Fix: 3D</div>
+          </div>
+
+          <!-- Battery -->
+          <div class="mqtt-tile">
+            <div class="tile-label">
+              <span>Battery (12V Li-ion)</span>
+              <span style="color:#4ade80;">🔋 BMS</span>
+            </div>
+            <div class="tile-value" id="mqttBattPct">76%</div>
+            <div class="tile-sub" id="mqttBattAmp">4.8 A (INA226)</div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="mqttBattBar" style="width:76%;"></div>
+            </div>
+          </div>
+
+          <!-- Tank Level -->
+          <div class="mqtt-tile">
+            <div class="tile-label">
+              <span>Tank Level</span>
+              <span style="color:#38bdf8;">💧 เซนเซอร์ระดับน้ำยา</span>
+            </div>
+            <div class="tile-value" id="mqttTankPct">63%</div>
+            <div class="tile-sub" id="mqttTankLiters">(6.30 L / 10.0 L)</div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="mqttTankBar" style="width:63%; background:#0ea5e9;"></div>
+            </div>
+          </div>
+
+          <!-- Flow Rate -->
+          <div class="mqtt-tile">
+            <div class="tile-label">
+              <span>Flow Rate</span>
+              <span>🌊 มาตรวัดการไหล</span>
+            </div>
+            <div class="tile-value" id="mqttFlowRate">1.82</div>
+            <div class="tile-sub">L/min</div>
+          </div>
+
+          <!-- Total Volume -->
+          <div class="mqtt-tile">
+            <div class="tile-label">
+              <span>Total Volume</span>
+              <span>📊 ปริมาณฉีดสะสม</span>
+            </div>
+            <div class="tile-value" id="mqttTotalVol">12.45 L</div>
+            <div class="tile-sub">Session Sprayed</div>
+          </div>
+
+          <!-- Pressure -->
+          <div class="mqtt-tile">
+            <div class="tile-label">
+              <span>Pressure</span>
+              <span>🧭 เซนเซอร์วัดแรงดัน</span>
+            </div>
+            <div class="tile-value" id="mqttPressure">2.35 bar</div>
+            <div class="tile-sub" id="mqttValveText">Solenoid: OPEN</div>
+          </div>
+
+          <!-- Speed -->
+          <div class="mqtt-tile">
+            <div class="tile-label">
+              <span>Speed</span>
+              <span>⚙️ Wheel Encoders</span>
+            </div>
+            <div class="tile-value" id="mqttSpeed">3.6 km/h</div>
+            <div class="tile-sub" id="mqttDistance">Dist: 142.5 m</div>
+          </div>
+
+          <!-- Pump Status -->
+          <div class="mqtt-tile">
+            <div class="tile-label">
+              <span>Pump Status</span>
+              <span>🔌 MOSFET Driver</span>
+            </div>
+            <div class="tile-value" id="mqttPumpStatus" style="color:#4ade80;">● ON</div>
+            <div class="tile-sub" id="mqttFanStatus">DIY Fans: ON</div>
+          </div>
+
+          <!-- Motor Status -->
+          <div class="mqtt-tile">
+            <div class="tile-label">
+              <span>Motor Status</span>
+              <span>Dual Driver</span>
+            </div>
+            <div class="tile-value" style="font-size:15px; margin-top:8px;">
+              L: <span id="mqttMotorL" style="color:#4ade80;">OK</span> &nbsp; R: <span id="mqttMotorR" style="color:#4ade80;">OK</span>
+            </div>
+            <div class="tile-sub" id="mqttPwmText">PWM L: 78% | R: 78%</div>
+          </div>
+
+          <!-- Connection -->
+          <div class="mqtt-tile">
+            <div class="tile-label">
+              <span>Connection</span>
+              <span>📶 SIM</span>
+            </div>
+            <div class="tile-value" style="color:#38bdf8; font-size:16px;">4G ▂▄▆█</div>
+            <div class="tile-sub" id="mqttHeartbeat">Heartbeat: 1s</div>
+          </div>
+
+          <!-- Alarms / Faults -->
+          <div class="mqtt-tile full-width" id="mqttAlarmTile" style="border-color:#10b981;">
+            <div class="tile-label">
+              <span>Alarms / Faults (ระบบแจ้งเตือนความปลอดภัย)</span>
+              <span>🔒 TLS/SSL Verified</span>
+            </div>
+            <div class="tile-value" id="mqttAlarmText" style="font-size:15px; color:#4ade80; margin-top:6px;">
+              ✔ No Fault (ระบบทำงานปกติ)
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="flow-grid" id="flowStepsContainer">
-        <div class="flow-step" data-step="1">
-          <div class="flow-num">STEP 1</div>
-          <div class="flow-name">1. วางแผนงาน (Plan)</div>
-          <ul class="flow-bullets">
-            <li>กำหนดแผนที่แปลง &amp; Waypoints</li>
-            <li>ตั้งค่าเป้าหมาย &amp; Geofence</li>
-          </ul>
+      <!-- Realtime Telemetry Log (MQTT Payload Stream) -->
+      <section class="card">
+        <div class="card-header">
+          <h3 class="card-title">📡 MQTT Telemetry &amp; MicroSD Data Logger</h3>
+          <span style="font-size:11px; color:var(--muted);">esp32/sprayer/telemetry</span>
         </div>
-        <div class="flow-step" data-step="2">
-          <div class="flow-num">STEP 2</div>
-          <div class="flow-name">2. นำทาง (Navigate)</div>
-          <ul class="flow-bullets">
-            <li>ระบุตำแหน่ง GPS + IMU</li>
-            <li>Wheel Encoders &amp; หลบสิ่งกีดขวาง</li>
-          </ul>
+        <div style="padding:12px;">
+          <pre id="mqttJsonPreview" style="margin:0; padding:10px; background:#080c12; border:1px solid var(--border); border-radius:8px; font-family:var(--mono); font-size:11px; color:#38bdf8; overflow-x:auto; line-height:1.4;"></pre>
         </div>
-        <div class="flow-step" data-step="3">
-          <div class="flow-num">STEP 3</div>
-          <div class="flow-name">3. ตรวจความปลอดภัย</div>
-          <ul class="flow-bullets">
-            <li>ตรวจปุ่ม E-Stop</li>
-            <li>ระดับน้ำยา / แบตเตอรี่ / เซนเซอร์</li>
-          </ul>
-        </div>
-        <div class="flow-step active" data-step="4">
-          <div class="flow-num">STEP 4</div>
-          <div class="flow-name">4. ฉีดพ่นตามเป้าหมาย</div>
-          <ul class="flow-bullets">
-            <li>เปิดปั๊ม 12V และโซลินอยด์วาล์ว</li>
-            <li>คุมอัตราการไหลตาม Target Flow</li>
-          </ul>
-        </div>
-        <div class="flow-step" data-step="5">
-          <div class="flow-num">STEP 5</div>
-          <div class="flow-name">5. ตรวจสอบการไหล</div>
-          <ul class="flow-bullets">
-            <li>ตรวจ Flow Meter &amp; Pressure</li>
-            <li>ปรับ PWM ปั๊มอัตโนมัติถ้าเบี่ยงเบน</li>
-          </ul>
-        </div>
-        <div class="flow-step" data-step="6">
-          <div class="flow-num">STEP 6</div>
-          <div class="flow-name">6. บันทึกข้อมูล (Log)</div>
-          <ul class="flow-bullets">
-            <li>บันทึกลง MicroSD Logger</li>
-            <li>ส่งขึ้น Secure MQTT Cloud</li>
-          </ul>
-        </div>
-        <div class="flow-step" data-step="7">
-          <div class="flow-num">STEP 7</div>
-          <div class="flow-name">7. กรณีผิดปกติ (Fault)</div>
-          <ul class="flow-bullets">
-            <li>ปิดปั๊ม/วาล์ว หยุดพ่นอัตโนมัติ</li>
-            <li>แจ้งเตือน Buzzer/LED &amp; หยุดรถ</li>
-          </ul>
-        </div>
-      </div>
-    </section>
-
-    <!-- Bottom Row 2: ESP32 Secure MQTT Cloud Connection & Topic Monitor -->
-    <section class="card" aria-label="การเชื่อมต่อ ESP32 Secure MQTT Broker">
-      <div class="card-header">
-        <h2 class="card-title">การเชื่อมต่อ ESP32 Secure MQTT Cloud (TLS/SSL WebSocket &amp; Data Logger)</h2>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <button type="button" id="mqttConnectBtn" class="btn btn-primary">เชื่อมต่อ MQTT Broker จริง</button>
-          <button type="button" id="mqttSimBtn" class="btn">ใช้โหมดจำลอง (Simulation)</button>
-        </div>
-      </div>
-
-      <div class="mqtt-form">
-        <div class="field-group">
-          <label for="mqttUrlInput">MQTT Broker WebSocket URL (TLS/SSL)</label>
-          <input type="text" id="mqttUrlInput" value="wss://broker.emqx.io:8084/mqtt">
-        </div>
-        <div class="field-group">
-          <label for="mqttTopicPrefix">Topic Prefix ของบอร์ด ESP32</label>
-          <input type="text" id="mqttTopicPrefix" value="esp32/sprayer01">
-        </div>
-        <div class="field-group">
-          <label for="mqttUserInput">Username (ถ้ามี)</label>
-          <input type="text" id="mqttUserInput" placeholder="เว้นว่างได้หากเป็น Public Broker">
-        </div>
-        <div class="field-group">
-          <label for="mqttPassInput">Password (ถ้ามี)</label>
-          <input type="password" id="mqttPassInput" placeholder="••••••••">
-        </div>
-      </div>
-
-      <div class="console-box" id="mqttConsole" aria-live="polite"></div>
-    </section>
-
+      </section>
+    </aside>
   </main>
 
   <script>
-    (function () {
-      'use strict';
+    /********************************************************************
+     * 1. ROBOT STATE & TELEMETRY MODEL (Matches ESP32 Poster Specs)
+     ********************************************************************/
+    const BASE_LAT = 13.756900;
+    const BASE_LON = 100.501800;
+    // Scale: 1 meter in 3D scene = ~0.000009 degrees Lat/Lon
+    const METER_TO_DEG = 0.000009;
 
-      // Initial state strictly grounded in the architecture diagram's MQTT Dashboard values
-      const state = {
-        simulation: true,
-        mqttClient: null,
-        mqttConnected: false,
+    const state = {
+      cameraMode: 'tps',      // 'fpv' (1st person), 'tps' (3rd person), 'orbit' (free)
+      driveMode: 'auto',      // 'auto' or 'manual'
+      eStop: false,
+      sprayerOn: true,
+      fansOn: true,
 
-        // Safety & Mode
-        estop: false,
-        autonomous: false,
-        driveCmd: 'stop', // stop, forward, backward, left, right, spin-left, spin-right
-        targetSpeedKmh: 3.6,
-        currentSpeedKmh: 3.6,
+      // Position & Kinematics in 3D space (meters, X: East/West, Z: North/South)
+      x: -12,
+      z: 14,
+      heading: 0,             // radians (0 = facing -Z / North)
+      speedKmh: 3.6,
+      targetSpeedKmh: 3.6,
+      currentSpeedKmh: 3.6,
+      distanceTraveled: 142.5,
+      wheelRotation: 0,
 
-        // GPS & Navigation (Base Lat 13.7563, Lon 100.5018 from diagram)
-        baseLat: 13.7563,
-        baseLon: 100.5018,
-        x: 150, // canvas px (field ~ 680x270, 10px = 1 meter)
-        y: 195,
-        headingDeg: 0, // 0 = East/Right on canvas
-        pitchDeg: 0.4,
-        rollDeg: -0.2,
-        odometryM: 142.8,
-        insideGeofence: true,
+      // Sprayer & Tank Metrics (matches poster numbers: 63% / 6.3L, 1.82 L/min, 2.35 bar, 12.45L total, 76% batt, 4.8A)
+      tankCapacityL: 10.0,
+      tankLevelL: 6.30,
+      targetFlowLmin: 1.82,
+      actualFlowLmin: 1.82,
+      pressureBar: 2.35,
+      totalVolumeL: 12.45,
 
-        // LiDAR / ToF / Ultrasonic obstacle simulation
-        obstacleActive: false,
-        obstacleX: 390,
-        obstacleY: 135,
-        lidarDistCm: 320,
+      // Electrical (12V Li-ion, BMS, INA219/INA226)
+      batteryPct: 76.0,
+      currentAmp: 4.8,
+      voltageV: 12.4,
 
-        // Sprayer Actuators (MOSFET / Relay Driver)
-        contactorOn: true,
-        pumpOn: true,
-        valveOpen: true,
-        fanOn: true,
-        targetFlowLpm: 1.82,
-        actualFlowLpm: 1.82,
-        pressureBar: 2.35,
-        tankCapacityL: 10.0,
-        tankLiters: 6.3, // 63% (6.3 L) from diagram
-        totalVolumeL: 12.45, // 12.45 L from diagram
+      // Obstacle Detection (LiDAR / ToF / Ultrasonic)
+      obstacleDistM: 4.80,
+      obstacleDetected: false,
+      avoidanceTimer: 0,
 
-        // Power & Electrical (12V Li-ion + BMS + INA219/INA226)
-        batteryPct: 76.0, // 76% from diagram
-        batteryVolt: 12.4,
-        currentAmp: 4.8, // 4.8 A from diagram
+      // Autonomous Waypoints (Boustrophedon orchard rows)
+      waypoints: [
+        { x: -12, z: -14 },
+        { x: -6,  z: -14 },
+        { x: -6,  z: 14 },
+        { x: 0,   z: 14 },
+        { x: 0,   z: -14 },
+        { x: 6,   z: -14 },
+        { x: 6,   z: 14 },
+        { x: 12,  z: 14 },
+        { x: 12,  z: -14 },
+        { x: -12, z: 14 }
+      ],
+      currentWpIndex: 0,
+      sdLogRows: 1420,
+      heartbeatSec: 1
+    };
 
-        // Auxiliary
-        sdLogging: true,
-        sdRecords: 48,
-        buzzerAuto: true,
-        heartbeatSec: 3,
-        activeStep: 4,
-        faultMessage: '',
+    const keysPressed = { w: false, a: false, s: false, d: false };
 
-        // Map trails & autonomous waypoints
-        sprayTrail: [],
-        waypoints: [
-          { x: 150, y: 75 },
-          { x: 310, y: 75 },
-          { x: 310, y: 195 },
-          { x: 470, y: 195 },
-          { x: 470, y: 75 }
-        ],
-        wpIndex: 0
-      };
+    /********************************************************************
+     * 2. THREE.JS 3D SIMULATION (ROBOT, SPRAY PARTICLES, ORCHARD, MINIMAP)
+     ********************************************************************/
+    const mainCanvas = document.getElementById('main3dCanvas');
+    const miniCanvas = document.getElementById('minimap3dCanvas');
 
-      const geofence = { x: 60, y: 36, w: 560, h: 198 };
+    const renderer = new THREE.WebGLRenderer({ canvas: mainCanvas, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
 
-      // DOM Elements
-      const el = {
-        dataModeBadge: document.getElementById('dataModeBadge'),
-        ledGreen: document.getElementById('ledGreen'),
-        ledAmber: document.getElementById('ledAmber'),
-        ledRed: document.getElementById('ledRed'),
-        heartbeatText: document.getElementById('heartbeatText'),
-        estopBtn: document.getElementById('estopBtn'),
-        estopBtnLabel: document.getElementById('estopBtnLabel'),
-        mqttBrokerState: document.getElementById('mqttBrokerState'),
+    const miniRenderer = new THREE.WebGLRenderer({ canvas: miniCanvas, antialias: true });
+    miniRenderer.setPixelRatio(1);
 
-        latLonDisplay: document.getElementById('latLonDisplay'),
-        geofenceStatus: document.getElementById('geofenceStatus'),
-        inaCurrentText: document.getElementById('inaCurrentText'),
-        battPctText: document.getElementById('battPctText'),
-        battVoltText: document.getElementById('battVoltText'),
-        battBar: document.getElementById('battBar'),
-        tankLiterText: document.getElementById('tankLiterText'),
-        tankPctText: document.getElementById('tankPctText'),
-        tankBar: document.getElementById('tankBar'),
-        flowRateText: document.getElementById('flowRateText'),
-        totalVolText: document.getElementById('totalVolText'),
-        pumpStateChip: document.getElementById('pumpStateChip'),
-        pressureText: document.getElementById('pressureText'),
-        valveStateSub: document.getElementById('valveStateSub'),
-        speedText: document.getElementById('speedText'),
-        motorStatusText: document.getElementById('motorStatusText'),
-        alarmMainText: document.getElementById('alarmMainText'),
-        alarmSubText: document.getElementById('alarmSubText'),
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0c1624);
+    scene.fog = new THREE.FogExp2(0x0c1624, 0.014);
 
-        modeManualBtn: document.getElementById('modeManualBtn'),
-        modeAutoBtn: document.getElementById('modeAutoBtn'),
-        fieldCanvas: document.getElementById('fieldCanvas'),
-        imuOverlayChip: document.getElementById('imuOverlayChip'),
-        lidarOverlayChip: document.getElementById('lidarOverlayChip'),
-        toggleObstacleBtn: document.getElementById('toggleObstacleBtn'),
-        clearTrailBtn: document.getElementById('clearTrailBtn'),
-        resetPosBtn: document.getElementById('resetPosBtn'),
+    // Cameras: Main Camera (switches between 1st Person FPV, 3rd Person Follow, and Orbit)
+    const mainCamera = new THREE.PerspectiveCamera(60, 16 / 9, 0.1, 200);
+    // Overhead 3D Minimap Camera (Perspective tilted top-down 3D radar)
+    const miniCamera = new THREE.PerspectiveCamera(50, 1, 1, 120);
 
-        encFrontText: document.getElementById('encFrontText'),
-        encRearText: document.getElementById('encRearText'),
-        pwmDriverText: document.getElementById('pwmDriverText'),
-        odometryText: document.getElementById('odometryText'),
-        targetSpeedSlider: document.getElementById('targetSpeedSlider'),
-        targetSpeedLabel: document.getElementById('targetSpeedLabel'),
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0xdbeafe, 0.65);
+    scene.add(ambientLight);
 
-        contactorToggle: document.getElementById('contactorToggle'),
-        pumpToggle: document.getElementById('pumpToggle'),
-        valveToggle: document.getElementById('valveToggle'),
-        fanToggle: document.getElementById('fanToggle'),
-        targetFlowSlider: document.getElementById('targetFlowSlider'),
-        targetFlowLabel: document.getElementById('targetFlowLabel'),
-        flowLoopBadge: document.getElementById('flowLoopBadge'),
-        refillTankBtn: document.getElementById('refillTankBtn'),
+    const dirLight = new THREE.DirectionalLight(0xfffbeb, 0.95);
+    dirLight.position.set(25, 40, 20);
+    dirLight.castShadow = true;
+    dirLight.shadow.mapSize.width = 1024;
+    dirLight.shadow.mapSize.height = 1024;
+    scene.add(dirLight);
 
-        pNodeBatt: document.getElementById('pNodeBatt'),
-        pSubBatt: document.getElementById('pSubBatt'),
-        pNodeIna: document.getElementById('pNodeIna'),
-        pSubIna: document.getElementById('pSubIna'),
-        sdToggle: document.getElementById('sdToggle'),
-        sdLogSub: document.getElementById('sdLogSub'),
-        testBuzzerBtn: document.getElementById('testBuzzerBtn'),
-        buzzerMuteToggle: document.getElementById('buzzerMuteToggle'),
+    // Ground / Agricultural Field
+    const groundGeo = new THREE.PlaneGeometry(90, 90, 32, 32);
+    const groundMat = new THREE.MeshStandardMaterial({
+      color: 0x1b2e1e,
+      roughness: 0.9,
+      metalness: 0.05
+    });
+    const ground = new THREE.Mesh(groundGeo, groundMat);
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    scene.add(ground);
 
-        autoFlowBadge: document.getElementById('autoFlowBadge'),
-        flowStepsContainer: document.getElementById('flowStepsContainer'),
+    // Field Grid & Geofence Boundary
+    const gridHelper = new THREE.GridHelper(40, 20, 0x0ea5e9, 0x2a4330);
+    gridHelper.position.y = 0.02;
+    scene.add(gridHelper);
 
-        mqttConnectBtn: document.getElementById('mqttConnectBtn'),
-        mqttSimBtn: document.getElementById('mqttSimBtn'),
-        mqttUrlInput: document.getElementById('mqttUrlInput'),
-        mqttTopicPrefix: document.getElementById('mqttTopicPrefix'),
-        mqttUserInput: document.getElementById('mqttUserInput'),
-        mqttPassInput: document.getElementById('mqttPassInput'),
-        mqttConsole: document.getElementById('mqttConsole')
-      };
+    // Geofence glowing border (32m x 34m orchard zone)
+    const fenceGeo = new THREE.EdgesGeometry(new THREE.BoxGeometry(32, 0.6, 34));
+    const fenceMat = new THREE.LineBasicMaterial({ color: 0x38bdf8 });
+    const fenceMesh = new THREE.LineSegments(fenceGeo, fenceMat);
+    fenceMesh.position.y = 0.3;
+    scene.add(fenceMesh);
 
-      const ctx = el.fieldCanvas.getContext('2d');
+    // Orchard Crop Rows (Trees/Bushes along rows X = -9, -3, 3, 9)
+    const trees = [];
+    const treeRowsX = [-9, -3, 3, 9];
+    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x5c4033, roughness: 0.9 });
 
-      // Web Audio Buzzer helper
-      let audioCtx = null;
-      function playBeep(freq, durationMs) {
-        try {
-          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-          if (!AudioContextClass) return;
-          if (!audioCtx) audioCtx = new AudioContextClass();
-          if (audioCtx.state === 'suspended') audioCtx.resume();
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          osc.type = 'square';
-          osc.frequency.value = freq || 880;
-          gain.gain.value = 0.05;
-          osc.connect(gain);
-          gain.connect(audioCtx.destination);
-          osc.start();
-          setTimeout(function () {
-            osc.stop();
-          }, durationMs || 140);
-        } catch (e) {
-          // Ignore audio restrictions in sandbox
-        }
-      }
+    treeRowsX.forEach(rx => {
+      for (let rz = -13; rz <= 13; rz += 3.25) {
+        const treeGroup = new THREE.Group();
+        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.22, 1.1, 8), trunkMat);
+        trunk.position.y = 0.55;
+        treeGroup.add(trunk);
 
-      function appendLog(topic, payloadText, level) {
-        const now = new Date();
-        const ts = now.toTimeString().slice(0, 8);
-        const p = document.createElement('div');
-        p.className = 'log-line';
-        const cls = level === 'err' ? 'err' : (level === 'warn' ? 'warn' : '');
-        p.innerHTML = '<span class="ts">[' + ts + ']</span> <span class="topic">' + topic + '</span> <span class="' + cls + '">' + payloadText + '</span>';
-        el.mqttConsole.appendChild(p);
-        while (el.mqttConsole.children.length > 40) {
-          el.mqttConsole.removeChild(el.mqttConsole.firstChild);
-        }
-        el.mqttConsole.scrollTop = el.mqttConsole.scrollHeight;
-      }
-
-      function publishCommand(subTopic, payloadObj) {
-        const prefix = (el.mqttTopicPrefix.value || 'esp32/sprayer01').trim();
-        const fullTopic = prefix + '/cmd/' + subTopic;
-        const jsonStr = JSON.stringify(payloadObj);
-        appendLog('PUB ' + fullTopic, jsonStr);
-        if (!state.simulation && state.mqttClient && state.mqttConnected) {
-          try {
-            state.mqttClient.publish(fullTopic, jsonStr, { qos: 0 });
-          } catch (e) {
-            appendLog('MQTT ERR', e.message, 'err');
-          }
-        }
-      }
-
-      // Update button visual states
-      function syncDriveButtons() {
-        const btns = document.querySelectorAll('.dpad-btn[data-drive]');
-        btns.forEach(function (btn) {
-          btn.classList.toggle('active', btn.getAttribute('data-drive') === state.driveCmd);
+        const foliageMat = new THREE.MeshStandardMaterial({
+          color: 0x22543d,
+          roughness: 0.7,
+          emissive: 0x000000
         });
-      }
+        const foliage = new THREE.Mesh(new THREE.SphereGeometry(0.95, 10, 10), foliageMat);
+        foliage.position.y = 1.65;
+        foliage.castShadow = true;
+        treeGroup.add(foliage);
 
-      function setDriveCommand(cmd) {
-        if (state.estop) return;
-        if (state.autonomous && cmd !== 'stop') {
-          // Switching to manual when user presses manual directional control
-          state.autonomous = false;
-          el.modeManualBtn.classList.add('active');
-          el.modeAutoBtn.classList.remove('active');
+        treeGroup.position.set(rx, 0, rz);
+        scene.add(treeGroup);
+        trees.push({ group: treeGroup, foliageMat, sprayed: false, x: rx, z: rz });
+      }
+    });
+
+    /********************************************************************
+     * BUILD THE EXACT DIY ESP32 SPRAYER ROBOT FROM THE UPLOADED IMAGE
+     * - Red tubular metal chassis frame (ท่อเหล็กแดง)
+     * - 4 black rugged tires with Wheel Encoders (ล้อยาง 4 ล้อ)
+     * - White 10L translucent chemical tank + black cap + level gauge
+     * - Twin vertical silver DIY fan towers at rear + brass nozzles
+     * - Waterproof IP65 controller box with ESP32 + FPV Antenna
+     * - Red mushroom Emergency Stop button on top
+     * - Front LiDAR / ToF / Ultrasonic sensor bar + FPV Camera
+     ********************************************************************/
+    const robotGroup = new THREE.Group();
+    scene.add(robotGroup);
+
+    // 1. Red Metal Tube Frame (ท่อเหล็กแดง)
+    const redTubeMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, metalness: 0.45, roughness: 0.35 });
+    const darkMetalMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.6, roughness: 0.4 });
+
+    // Base chassis platform
+    const chassisBase = new THREE.Mesh(new THREE.BoxGeometry(1.35, 0.12, 1.9), darkMetalMat);
+    chassisBase.position.y = 0.42;
+    chassisBase.castShadow = true;
+    robotGroup.add(chassisBase);
+
+    // Red tubular roll-cage bars around chassis
+    function makeTube(w, h, d, x, y, z) {
+      const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), redTubeMat);
+      m.position.set(x, y, z);
+      m.castShadow = true;
+      robotGroup.add(m);
+    }
+    // Lower & upper side rails
+    makeTube(0.07, 0.07, 1.98, -0.68, 0.48, 0);
+    makeTube(0.07, 0.07, 1.98,  0.68, 0.48, 0);
+    makeTube(0.07, 0.07, 1.85, -0.68, 0.85, 0);
+    makeTube(0.07, 0.07, 1.85,  0.68, 0.85, 0);
+    // Cross bars front & rear
+    makeTube(1.42, 0.07, 0.07, 0, 0.48, -0.96);
+    makeTube(1.42, 0.07, 0.07, 0, 0.48,  0.96);
+    makeTube(1.42, 0.07, 0.07, 0, 0.85, -0.90);
+    makeTube(1.42, 0.07, 0.07, 0, 0.85,  0.90);
+    // Vertical corner posts
+    makeTube(0.07, 0.38, 0.07, -0.68, 0.66, -0.90);
+    makeTube(0.07, 0.38, 0.07,  0.68, 0.66, -0.90);
+    makeTube(0.07, 0.38, 0.07, -0.68, 0.66,  0.90);
+    makeTube(0.07, 0.38, 0.07,  0.68, 0.66,  0.90);
+
+    // 2. 4 Rugged Rubber Tires + Wheel Encoders
+    const wheelMeshes = [];
+    const tireMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.85 });
+    const hubMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.7, roughness: 0.3 });
+    const wheelPositions = [
+      [-0.78, 0.36, -0.68], // Front Left
+      [ 0.78, 0.36, -0.68], // Front Right
+      [-0.78, 0.36,  0.68], // Rear Left
+      [ 0.78, 0.36,  0.68]  // Rear Right
+    ];
+    wheelPositions.forEach(([wx, wy, wz]) => {
+      const wGroup = new THREE.Group();
+      const tire = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.36, 0.26, 20), tireMat);
+      tire.rotation.z = Math.PI / 2;
+      tire.castShadow = true;
+      wGroup.add(tire);
+
+      const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.17, 0.28, 12), hubMat);
+      hub.rotation.z = Math.PI / 2;
+      wGroup.add(hub);
+
+      wGroup.position.set(wx, wy, wz);
+      robotGroup.add(wGroup);
+      wheelMeshes.push(wGroup);
+    });
+
+    // 3. White DIY Chemical Tank (ถังน้ำยาขาว) + Dynamic Liquid Level Inside
+    const tankShellMat = new THREE.MeshStandardMaterial({
+      color: 0xf8fafc,
+      transparent: true,
+      opacity: 0.82,
+      roughness: 0.25
+    });
+    const tankMesh = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.56, 1.05), tankShellMat);
+    tankMesh.position.set(0, 0.78, -0.05);
+    robotGroup.add(tankMesh);
+
+    // Liquid inside tank (blue-green chemical)
+    const liquidMat = new THREE.MeshStandardMaterial({ color: 0x0ea5e9, roughness: 0.2 });
+    const liquidMesh = new THREE.Mesh(new THREE.BoxGeometry(0.89, 0.48, 0.99), liquidMat);
+    liquidMesh.position.set(0, 0.74, -0.05);
+    robotGroup.add(liquidMesh);
+
+    // Black Tank Cap on top
+    const tankCap = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.08, 16), tireMat);
+    tankCap.position.set(0, 1.09, -0.15);
+    robotGroup.add(tankCap);
+
+    // 4. Emergency Stop Button (ปุ่มหยุดฉุกเฉินสีแดงด้านบน)
+    const eStopBase = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.06, 12),
+      new THREE.MeshStandardMaterial({ color: 0xfacc15 }));
+    eStopBase.position.set(0.35, 1.08, -0.42);
+    robotGroup.add(eStopBase);
+
+    const eStopButton = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.09, 0.06, 16),
+      new THREE.MeshStandardMaterial({ color: 0xef4444, emissive: 0x450a0a }));
+    eStopButton.position.set(0.35, 1.13, -0.42);
+    robotGroup.add(eStopButton);
+
+    // 5. Twin DIY Fan Sprayer Ducts + Brass Nozzles at Rear (พัดลม DIY + หัวฉีดทองเหลือง)
+    const silverMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, metalness: 0.75, roughness: 0.25 });
+    const brassMat = new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.85, roughness: 0.2 });
+    const fanBlades = [];
+
+    [-0.36, 0.36].forEach(fx => {
+      // Vertical silver duct cylinder
+      const duct = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.24, 0.62, 16), silverMat);
+      duct.position.set(fx, 1.12, 0.68);
+      duct.castShadow = true;
+      robotGroup.add(duct);
+
+      // Spinning fan blade inside duct
+      const blade = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.03, 0.08), darkMetalMat);
+      blade.position.set(fx, 1.38, 0.68);
+      robotGroup.add(blade);
+      fanBlades.push(blade);
+
+      // Brass Nozzles (หัวฉีดทองเหลือง) pointing outward left/right
+      const nozzle = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.18, 10), brassMat);
+      nozzle.rotation.z = Math.PI / 2;
+      nozzle.position.set(fx + (fx < 0 ? -0.22 : 0.22), 1.25, 0.68);
+      robotGroup.add(nozzle);
+    });
+
+    // 6. Waterproof IP65 Controller Box + ESP32 + FPV Antenna + Front Camera & LiDAR
+    const ip65Box = new THREE.Mesh(new THREE.BoxGeometry(0.56, 0.24, 0.38),
+      new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.4 }));
+    ip65Box.position.set(0, 0.62, -0.72);
+    robotGroup.add(ip65Box);
+
+    // FPV Antenna (เสาอากาศสีดำ)
+    const antenna = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.02, 0.55, 8), tireMat);
+    antenna.position.set(-0.22, 0.98, -0.72);
+    robotGroup.add(antenna);
+
+    // Front LiDAR / ToF / Ultrasonic Sensor + FPV Camera lens
+    const sensorHead = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.14, 0.14),
+      new THREE.MeshStandardMaterial({ color: 0x0ea5e9, emissive: 0x0284c7, emissiveIntensity: 0.4 }));
+    sensorHead.position.set(0, 0.92, -0.92);
+    robotGroup.add(sensorHead);
+
+    // LiDAR Scanning Cone (Visual laser beam in front of robot)
+    const lidarGeo = new THREE.ConeGeometry(1.4, 3.8, 16, 1, true);
+    const lidarMat = new THREE.MeshBasicMaterial({
+      color: 0x10b981,
+      transparent: true,
+      opacity: 0.14,
+      side: THREE.DoubleSide,
+      wireframe: false
+    });
+    const lidarCone = new THREE.Mesh(lidarGeo, lidarMat);
+    lidarCone.rotation.x = -Math.PI / 2;
+    lidarCone.position.set(0, 0.65, -2.85);
+    robotGroup.add(lidarCone);
+
+    /********************************************************************
+     * 3. CHEMICAL SPRAY PARTICLE SYSTEM & GROUND TRAIL
+     ********************************************************************/
+    const PARTICLE_COUNT = 260;
+    const particleGeo = new THREE.BufferGeometry();
+    const particlePositions = new Float32Array(PARTICLE_COUNT * 3);
+    const particleVelocities = [];
+
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      particlePositions[i * 3] = 0;
+      particlePositions[i * 3 + 1] = -10; // hidden below ground initially
+      particlePositions[i * 3 + 2] = 0;
+      particleVelocities.push({ vx: 0, vy: 0, vz: 0, life: 0 });
+    }
+    particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+
+    const particleMat = new THREE.PointsMaterial({
+      color: 0x7dd3fc,
+      size: 0.24,
+      transparent: true,
+      opacity: 0.75
+    });
+    const sprayParticles = new THREE.Points(particleGeo, particleMat);
+    scene.add(sprayParticles);
+
+    // Trail marks on ground showing sprayed path
+    const trailGroup = new THREE.Group();
+    scene.add(trailGroup);
+    const trailMat = new THREE.MeshBasicMaterial({
+      color: 0x0284c7,
+      transparent: true,
+      opacity: 0.35,
+      side: THREE.DoubleSide
+    });
+    let lastTrailPos = { x: -999, z: -999 };
+
+    // Test Obstacle (Crate/Barrel that user can spawn in front of robot)
+    let obstacleMesh = null;
+    function spawnTestObstacle() {
+      if (obstacleMesh) {
+        scene.remove(obstacleMesh);
+      }
+      const obsGeo = new THREE.BoxGeometry(1.4, 1.3, 1.4);
+      const obsMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.5 });
+      obstacleMesh = new THREE.Mesh(obsGeo, obsMat);
+      // Place 4.2 meters directly ahead of robot
+      const dist = 4.2;
+      const ox = state.x - Math.sin(state.heading) * dist;
+      const oz = state.z - Math.cos(state.heading) * dist;
+      obstacleMesh.position.set(ox, 0.65, oz);
+      obstacleMesh.castShadow = true;
+      scene.add(obstacleMesh);
+    }
+
+    /********************************************************************
+     * 4. REAL GIS MAP INTEGRATION (LEAFLET.JS)
+     ********************************************************************/
+    let realMap, robotMarker, sprayPolyline, satelliteLayer, streetLayer;
+    let currentLayerIsSat = true;
+    const gpsTrailCoords = [];
+
+    function initRealMap() {
+      if (typeof L === 'undefined') return;
+
+      realMap = L.map('realMap', {
+        center: [BASE_LAT, BASE_LON],
+        zoom: 19,
+        zoomControl: true
+      });
+
+      satelliteLayer = L.tileLayer('about:invalid#zPythonSafez', {
+        maxZoom: 20,
+        attribution: 'Esri Satellite'
+      });
+
+      streetLayer = L.tileLayer('about:invalid#zPythonSafez', {
+        maxZoom: 20,
+        attribution: '© OpenStreetMap'
+      });
+
+      satelliteLayer.addTo(realMap);
+
+      // Geofence polygon around agricultural plot
+      const geofenceBounds = [
+        [BASE_LAT + 16 * METER_TO_DEG, BASE_LON - 15 * METER_TO_DEG],
+        [BASE_LAT + 16 * METER_TO_DEG, BASE_LON + 15 * METER_TO_DEG],
+        [BASE_LAT - 16 * METER_TO_DEG, BASE_LON + 15 * METER_TO_DEG],
+        [BASE_LAT - 16 * METER_TO_DEG, BASE_LON - 15 * METER_TO_DEG]
+      ];
+      L.polygon(geofenceBounds, {
+        color: '#38bdf8',
+        weight: 2,
+        fillColor: '#0ea5e9',
+        fillOpacity: 0.12,
+        dashArray: '6, 6'
+      }).addTo(realMap);
+
+      // Sprayed trail polyline on real map
+      sprayPolyline = L.polyline([], {
+        color: '#10b981',
+        weight: 5,
+        opacity: 0.8
+      }).addTo(realMap);
+
+      // Custom Robot Icon
+      const robotIcon = L.divIcon({
+        className: 'custom-robot-marker',
+        html: `<div style="width:22px;height:22px;border-radius:50%;background:#ef4444;border:3px solid #fff;box-shadow:0 0 10px #ef4444;display:flex;align-items:center;justify-content:center;font-size:10px;">🚜</div>`,
+        iconSize: [22, 22],
+        iconAnchor: [11, 11]
+      });
+
+      const initLat = BASE_LAT - state.z * METER_TO_DEG;
+      const initLon = BASE_LON + state.x * METER_TO_DEG;
+      robotMarker = L.marker([initLat, initLon], { icon: robotIcon }).addTo(realMap);
+
+      // Click on real map to add custom target waypoint
+      realMap.on('click', (e) => {
+        const targetZ = -(e.latlng.lat - BASE_LAT) / METER_TO_DEG;
+        const targetX = (e.latlng.lng - BASE_LON) / METER_TO_DEG;
+        const clampedX = Math.max(-15, Math.min(15, targetX));
+        const clampedZ = Math.max(-15, Math.min(15, targetZ));
+
+        state.waypoints.unshift({ x: clampedX, z: clampedZ });
+        state.currentWpIndex = 0;
+        setDriveMode('auto');
+
+        L.circleMarker(e.latlng, {
+          radius: 5,
+          color: '#f59e0b',
+          fillColor: '#facc15',
+          fillOpacity: 0.9
+        }).addTo(realMap);
+      });
+    }
+
+    function centerRealMap() {
+      if (!realMap) return;
+      const lat = BASE_LAT - state.z * METER_TO_DEG;
+      const lon = BASE_LON + state.x * METER_TO_DEG;
+      realMap.panTo([lat, lon]);
+    }
+
+    function toggleMapLayer() {
+      if (!realMap) return;
+      if (currentLayerIsSat) {
+        realMap.removeLayer(satelliteLayer);
+        streetLayer.addTo(realMap);
+      } else {
+        realMap.removeLayer(streetLayer);
+        satelliteLayer.addTo(realMap);
+      }
+      currentLayerIsSat = !currentLayerIsSat;
+    }
+
+    /********************************************************************
+     * 5. UI CONTROLS & INTERACTION HANDLERS
+     ********************************************************************/
+    function setCameraMode(mode) {
+      state.cameraMode = mode;
+      document.getElementById('btnCamFPV').classList.toggle('active', mode === 'fpv');
+      document.getElementById('btnCamTPS').classList.toggle('active', mode === 'tps');
+      document.getElementById('btnCamFree').classList.toggle('active', mode === 'orbit');
+      document.getElementById('fpvReticle').style.display = (mode === 'fpv') ? 'flex' : 'none';
+
+      const labels = {
+        fpv: 'MODE: 1ST PERSON FPV (กล้องหน้ารถหุ่นยนต์)',
+        tps: 'MODE: 3RD PERSON FOLLOW (มุมมองบุคคลที่ 3)',
+        orbit: 'MODE: 360° ORBIT INSPECT (มุมมองรอบคัน)'
+      };
+      document.getElementById('osdViewLabel').textContent = labels[mode];
+    }
+
+    function setDriveMode(mode) {
+      state.driveMode = mode;
+      document.getElementById('btnModeManual').classList.toggle('active', mode === 'manual');
+      document.getElementById('btnModeAuto').classList.toggle('active', mode === 'auto');
+    }
+
+    function toggleSprayer() {
+      if (state.eStop) return;
+      state.sprayerOn = !state.sprayerOn;
+      updateSprayerButtons();
+    }
+
+    function updateSprayerButtons() {
+      const btn = document.getElementById('btnSprayToggle');
+      btn.classList.toggle('active', state.sprayerOn);
+      btn.textContent = state.sprayerOn
+        ? '💦 ปั๊มน้ำยา + โซลินอยด์วาล์ว: เปิด (ON)'
+        : '💦 ปั๊มน้ำยา + โซลินอยด์วาล์ว: ปิด (OFF)';
+    }
+
+    function toggleFans() {
+      if (state.eStop) return;
+      state.fansOn = !state.fansOn;
+      const btn = document.getElementById('btnFanToggle');
+      btn.classList.toggle('active', state.fansOn);
+      btn.textContent = state.fansOn
+        ? '🌀 พัดลมคู่ DIY: เปิด (ON)'
+        : '🌀 พัดลมคู่ DIY: ปิด (OFF)';
+    }
+
+    function toggleEmergencyStop() {
+      state.eStop = !state.eStop;
+      const btn = document.getElementById('btnEstopTop');
+      btn.classList.toggle('active', state.eStop);
+      if (state.eStop) {
+        state.sprayerOn = false;
+        state.fansOn = false;
+        updateSprayerButtons();
+        document.getElementById('btnFanToggle').classList.remove('active');
+      } else {
+        state.sprayerOn = true;
+        state.fansOn = true;
+        updateSprayerButtons();
+        document.getElementById('btnFanToggle').classList.add('active');
+      }
+    }
+
+    function updateTargetFlow(val) {
+      state.targetFlowLmin = parseFloat(val);
+      const calcBar = (1.1 + state.targetFlowLmin * 0.68).toFixed(2);
+      document.getElementById('targetFlowLabel').textContent = `${state.targetFlowLmin.toFixed(2)} L/min (${calcBar} bar)`;
+    }
+
+    function updateTargetSpeed(val) {
+      state.targetSpeedKmh = parseFloat(val);
+      document.getElementById('targetSpeedLabel').textContent = `${state.targetSpeedKmh.toFixed(1)} km/h`;
+    }
+
+    function refillTank() {
+      state.tankLevelL = state.tankCapacityL;
+    }
+
+    function rechargeBattery() {
+      state.batteryPct = 100.0;
+      state.voltageV = 12.6;
+    }
+
+    function resetSimulation() {
+      state.x = -12;
+      state.z = 14;
+      state.heading = 0;
+      state.currentWpIndex = 0;
+      state.tankLevelL = 6.30;
+      state.batteryPct = 76.0;
+      state.totalVolumeL = 12.45;
+      state.eStop = false;
+      state.sprayerOn = true;
+      state.fansOn = true;
+      document.getElementById('btnEstopTop').classList.remove('active');
+      updateSprayerButtons();
+
+      // Clear ground trail
+      while (trailGroup.children.length > 0) {
+        trailGroup.remove(trailGroup.children[0]);
+      }
+      trees.forEach(t => {
+        t.sprayed = false;
+        t.foliageMat.color.setHex(0x22543d);
+      });
+      if (sprayPolyline) {
+        gpsTrailCoords.length = 0;
+        sprayPolyline.setLatLngs([]);
+      }
+      if (obstacleMesh) {
+        scene.remove(obstacleMesh);
+        obstacleMesh = null;
+      }
+    }
+
+    // Keyboard & On-screen D-Pad Controls
+    function startKey(k) {
+      keysPressed[k] = true;
+      const el = document.getElementById('key' + k.toUpperCase());
+      if (el) el.classList.add('pressed');
+      if (state.driveMode !== 'manual') setDriveMode('manual');
+    }
+
+    function stopKey(k) {
+      keysPressed[k] = false;
+      const el = document.getElementById('key' + k.toUpperCase());
+      if (el) el.classList.remove('pressed');
+    }
+
+    window.addEventListener('keydown', (e) => {
+      const k = e.key.toLowerCase();
+      if (['w', 'a', 's', 'd'].includes(k)) startKey(k);
+      if (e.key === 'ArrowUp') startKey('w');
+      if (e.key === 'ArrowLeft') startKey('a');
+      if (e.key === 'ArrowDown') startKey('s');
+      if (e.key === 'ArrowRight') startKey('d');
+    });
+
+    window.addEventListener('keyup', (e) => {
+      const k = e.key.toLowerCase();
+      if (['w', 'a', 's', 'd'].includes(k)) stopKey(k);
+      if (e.key === 'ArrowUp') stopKey('w');
+      if (e.key === 'ArrowLeft') stopKey('a');
+      if (e.key === 'ArrowDown') stopKey('s');
+      if (e.key === 'ArrowRight') stopKey('d');
+    });
+
+    /********************************************************************
+     * 6. MAIN SIMULATION LOOP (PHYSICS, SPRAYING, SENSORS, CAMERAS)
+     ********************************************************************/
+    let lastTime = performance.now();
+    let orbitAngle = 0;
+
+    function updateSimulation(dt) {
+      // 1. Check Obstacle Distance (LiDAR / ToF / Ultrasonic)
+      state.obstacleDistM = 4.85;
+      state.obstacleDetected = false;
+
+      if (obstacleMesh) {
+        const dx = obstacleMesh.position.x - state.x;
+        const dz = obstacleMesh.position.z - state.z;
+        const dist = Math.hypot(dx, dz);
+        // Check if obstacle is roughly in front cone
+        const forwardX = -Math.sin(state.heading);
+        const forwardZ = -Math.cos(state.heading);
+        const dot = (dx * forwardX + dz * forwardZ) / (dist || 1);
+        if (dot > 0.55 && dist < 4.8) {
+          state.obstacleDistM = Math.max(0.4, dist - 0.6);
+          if (state.obstacleDistM < 2.3) {
+            state.obstacleDetected = true;
+          }
         }
-        state.driveCmd = cmd;
-        syncDriveButtons();
-        publishCommand('drive', { action: cmd, targetSpeedKmh: state.targetSpeedKmh });
       }
 
-      // Bind D-Pad buttons
-      document.querySelectorAll('.dpad-btn[data-drive]').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          setDriveCommand(btn.getAttribute('data-drive'));
+      lidarMat.color.setHex(state.obstacleDetected ? 0xef4444 : 0x10b981);
+
+      // 2. Movement & Navigation Logic
+      let moveVelocity = 0; // m/s
+      let turnRate = 0;     // rad/s
+
+      if (state.eStop || state.batteryPct <= 0.5) {
+        state.currentSpeedKmh = 0;
+      } else if (state.obstacleDetected && state.driveMode === 'auto') {
+        // Autonomous obstacle avoidance maneuver
+        state.currentSpeedKmh = 1.4;
+        moveVelocity = state.currentSpeedKmh / 3.6;
+        turnRate = 0.85;
+      } else if (state.driveMode === 'auto') {
+        const wp = state.waypoints[state.currentWpIndex];
+        const dx = wp.x - state.x;
+        const dz = wp.z - state.z;
+        const distToWp = Math.hypot(dx, dz);
+
+        if (distToWp < 0.85) {
+          state.currentWpIndex = (state.currentWpIndex + 1) % state.waypoints.length;
+        } else {
+          // Desired heading where 0 = -Z, PI/2 = -X
+          const desiredHeading = Math.atan2(-dx, -dz);
+          let angleDiff = desiredHeading - state.heading;
+          while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+          while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+
+          turnRate = Math.max(-1.6, Math.min(1.6, angleDiff * 2.5));
+          state.currentSpeedKmh = Math.abs(angleDiff) > 0.45
+            ? state.targetSpeedKmh * 0.55
+            : state.targetSpeedKmh;
+          moveVelocity = state.currentSpeedKmh / 3.6;
+        }
+      } else {
+        // Manual RC Mode
+        const maxV = state.targetSpeedKmh / 3.6;
+        if (keysPressed.w) moveVelocity = maxV;
+        else if (keysPressed.s) moveVelocity = -maxV * 0.7;
+
+        if (keysPressed.a) turnRate = 1.35;
+        if (keysPressed.d) turnRate = -1.35;
+
+        state.currentSpeedKmh = Math.abs(moveVelocity * 3.6);
+      }
+
+      // Apply kinematics
+      state.heading += turnRate * dt;
+      state.x -= Math.sin(state.heading) * moveVelocity * dt;
+      state.z -= Math.cos(state.heading) * moveVelocity * dt;
+
+      // Keep inside farm boundaries
+      state.x = Math.max(-16, Math.min(16, state.x));
+      state.z = Math.max(-16, Math.min(16, state.z));
+
+      state.distanceTraveled += Math.abs(moveVelocity * dt);
+
+      // Update 3D robot transform
+      robotGroup.position.set(state.x, 0, state.z);
+      robotGroup.rotation.y = state.heading;
+
+      // Spin 4 wheels based on speed
+      state.wheelRotation += moveVelocity * dt * 2.8;
+      wheelMeshes.forEach(w => { w.rotation.x = -state.wheelRotation; });
+
+      // Spin twin DIY fans
+      if (state.fansOn && !state.eStop) {
+        fanBlades.forEach(b => { b.rotation.y += dt * 28; });
+      }
+
+      // 3. Chemical Spraying, Tank Level & Crop Coverage
+      const activelySpraying = state.sprayerOn && !state.eStop && state.tankLevelL > 0.01;
+      if (activelySpraying) {
+        // Fluctuate flow slightly for realism around targetFlowLmin
+        const jitter = (Math.sin(performance.now() * 0.005) * 0.02);
+        state.actualFlowLmin = Math.max(0, state.targetFlowLmin + jitter);
+        state.pressureBar = 1.1 + state.actualFlowLmin * 0.68;
+
+        const litersUsed = (state.actualFlowLmin / 60) * dt;
+        state.tankLevelL = Math.max(0, state.tankLevelL - litersUsed);
+        state.totalVolumeL += litersUsed;
+
+        if (state.tankLevelL <= 0.01) {
+          state.sprayerOn = false;
+          updateSprayerButtons();
+        }
+
+        // Drop ground wet trail every 0.65m
+        if (Math.hypot(state.x - lastTrailPos.x, state.z - lastTrailPos.z) > 0.65) {
+          const patch = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 0.75), trailMat);
+          patch.rotation.x = -Math.PI / 2;
+          patch.rotation.z = state.heading;
+          patch.position.set(state.x, 0.03, state.z);
+          trailGroup.add(patch);
+          lastTrailPos = { x: state.x, z: state.z };
+        }
+
+        // Mark nearby orchard trees as sprayed (bright healthy emerald green)
+        trees.forEach(t => {
+          if (!t.sprayed && Math.hypot(t.x - state.x, t.z - state.z) < 3.1) {
+            t.sprayed = true;
+            t.foliageMat.color.setHex(0x10b981);
+          }
         });
-      });
+      } else {
+        state.actualFlowLmin = 0;
+        state.pressureBar = 0;
+      }
 
-      // Keyboard shortcuts (WASD / Arrows / Q / E / Space) when not typing in an input
-      window.addEventListener('keydown', function (ev) {
-        const tag = ev.target && ev.target.tagName;
-        if (tag === 'INPUT' || tag === 'TEXTAREA') return;
-        const k = ev.key.toLowerCase();
-        if (k === 'w' || ev.key === 'ArrowUp') { ev.preventDefault(); setDriveCommand('forward'); }
-        else if (k === 's' || ev.key === 'ArrowDown') { ev.preventDefault(); setDriveCommand('backward'); }
-        else if (k === 'a' || ev.key === 'ArrowLeft') { ev.preventDefault(); setDriveCommand('left'); }
-        else if (k === 'd' || ev.key === 'ArrowRight') { ev.preventDefault(); setDriveCommand('right'); }
-        else if (k === 'q') { ev.preventDefault(); setDriveCommand('spin-left'); }
-        else if (k === 'e') { ev.preventDefault(); setDriveCommand('spin-right'); }
-        else if (ev.key === ' ') { ev.preventDefault(); setDriveCommand('stop'); }
-      });
+      // Update 3D Tank Liquid Height visually
+      const tankRatio = Math.max(0.02, state.tankLevelL / state.tankCapacityL);
+      liquidMesh.scale.y = tankRatio;
+      liquidMesh.position.y = 0.50 + (0.48 * tankRatio) / 2;
 
-      // Mode switches
-      el.modeManualBtn.addEventListener('click', function () {
-        state.autonomous = false;
-        state.driveCmd = 'stop';
-        el.modeManualBtn.classList.add('active');
-        el.modeAutoBtn.classList.remove('active');
-        syncDriveButtons();
-        publishCommand('mode', { mode: 'manual' });
-      });
+      // Update Spray Mist Particles from rear twin brass nozzles
+      const posArr = particleGeo.attributes.position.array;
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        const p = particleVelocities[i];
+        p.life -= dt;
+        if (p.life <= 0) {
+          if (activelySpraying) {
+            // Emit from left or right rear fan tower nozzle in world coordinates
+            const side = (i % 2 === 0) ? -1 : 1;
+            const localNozzle = new THREE.Vector3(side * 0.58, 1.25, 0.68);
+            localNozzle.applyAxisAngle(new THREE.Vector3(0, 1, 0), state.heading);
+            posArr[i * 3]     = state.x + localNozzle.x;
+            posArr[i * 3 + 1] = localNozzle.y;
+            posArr[i * 3 + 2] = state.z + localNozzle.z;
 
-      el.modeAutoBtn.addEventListener('click', function () {
-        if (state.estop) return;
-        state.autonomous = true;
-        el.modeAutoBtn.classList.add('active');
-        el.modeManualBtn.classList.remove('active');
-        publishCommand('mode', { mode: 'autonomous', waypoints: state.waypoints.length });
-      });
-
-      // Emergency Stop Button
-      el.estopBtn.addEventListener('click', function () {
-        state.estop = !state.estop;
-        if (state.estop) {
-          state.driveCmd = 'stop';
-          state.autonomous = false;
-          state.pumpOn = false;
-          state.valveOpen = false;
-          el.modeManualBtn.classList.add('active');
-          el.modeAutoBtn.classList.remove('active');
-          syncDriveButtons();
-          if (state.buzzerAuto) playBeep(520, 260);
-          publishCommand('estop', { engaged: true });
-        } else {
-          publishCommand('estop', { engaged: false });
-        }
-        renderUI();
-      });
-
-      // Sliders
-      el.targetSpeedSlider.addEventListener('input', function () {
-        state.targetSpeedKmh = parseFloat(el.targetSpeedSlider.value);
-        el.targetSpeedLabel.textContent = state.targetSpeedKmh.toFixed(1) + ' km/h';
-      });
-      el.targetSpeedSlider.addEventListener('change', function () {
-        publishCommand('speed', { targetSpeedKmh: state.targetSpeedKmh });
-      });
-
-      el.targetFlowSlider.addEventListener('input', function () {
-        state.targetFlowLpm = parseFloat(el.targetFlowSlider.value);
-        el.targetFlowLabel.textContent = state.targetFlowLpm.toFixed(2) + ' L/min';
-      });
-      el.targetFlowSlider.addEventListener('change', function () {
-        publishCommand('sprayer', { targetFlowLpm: state.targetFlowLpm });
-      });
-
-      // Sprayer & Power Actuators
-      el.contactorToggle.addEventListener('click', function () {
-        state.contactorOn = !state.contactorOn;
-        if (!state.contactorOn) {
-          state.driveCmd = 'stop';
-          state.pumpOn = false;
-          state.valveOpen = false;
-          state.fanOn = false;
-          syncDriveButtons();
-        }
-        publishCommand('power', { contactor: state.contactorOn });
-        renderUI();
-      });
-
-      el.pumpToggle.addEventListener('click', function () {
-        if (state.estop || !state.contactorOn) return;
-        state.pumpOn = !state.pumpOn;
-        publishCommand('sprayer', { pump: state.pumpOn });
-        renderUI();
-      });
-
-      el.valveToggle.addEventListener('click', function () {
-        if (state.estop || !state.contactorOn) return;
-        state.valveOpen = !state.valveOpen;
-        publishCommand('sprayer', { solenoidValve: state.valveOpen });
-        renderUI();
-      });
-
-      el.fanToggle.addEventListener('click', function () {
-        if (state.estop || !state.contactorOn) return;
-        state.fanOn = !state.fanOn;
-        publishCommand('sprayer', { fans: state.fanOn });
-        renderUI();
-      });
-
-      el.refillTankBtn.addEventListener('click', function () {
-        state.tankLiters = state.tankCapacityL;
-        appendLog('SIM TANK', 'เติมน้ำยาในถังเต็ม 10.0 L (100%)');
-        renderUI();
-      });
-
-      // Auxiliary Toggles
-      el.sdToggle.addEventListener('click', function () {
-        state.sdLogging = !state.sdLogging;
-        publishCommand('logger', { microSdRec: state.sdLogging });
-        renderUI();
-      });
-
-      el.testBuzzerBtn.addEventListener('click', function () {
-        playBeep(920, 160);
-        publishCommand('buzzer', { testBeep: true });
-      });
-
-      el.buzzerMuteToggle.addEventListener('click', function () {
-        state.buzzerAuto = !state.buzzerAuto;
-        renderUI();
-      });
-
-      // Map Controls
-      el.toggleObstacleBtn.addEventListener('click', function () {
-        state.obstacleActive = !state.obstacleActive;
-        if (state.obstacleActive) {
-          // Place obstacle ahead of current rover pose
-          const rad = (state.headingDeg * Math.PI) / 180;
-          state.obstacleX = Math.max(geofence.x + 25, Math.min(geofence.x + geofence.w - 25, state.x + Math.cos(rad) * 85));
-          state.obstacleY = Math.max(geofence.y + 25, Math.min(geofence.y + geofence.h - 25, state.y + Math.sin(rad) * 85));
-          appendLog('SENSOR LiDAR', 'ตรวจพบวัตถุจำลองด้านหน้าในแปลง', 'warn');
-        } else {
-          appendLog('SENSOR LiDAR', 'นำสิ่งกีดขวางจำลองออกแล้ว');
-        }
-        el.toggleObstacleBtn.textContent = state.obstacleActive ? 'นำสิ่งกีดขวางออก' : 'จำลองสิ่งกีดขวาง (LiDAR)';
-      });
-
-      el.clearTrailBtn.addEventListener('click', function () {
-        state.sprayTrail = [];
-      });
-
-      el.resetPosBtn.addEventListener('click', function () {
-        state.x = 150;
-        state.y = 195;
-        state.headingDeg = 0;
-        state.wpIndex = 0;
-        state.driveCmd = 'stop';
-        syncDriveButtons();
-      });
-
-      el.fieldCanvas.addEventListener('click', function (ev) {
-        const rect = el.fieldCanvas.getBoundingClientRect();
-        const scaleX = el.fieldCanvas.width / rect.width;
-        const scaleY = el.fieldCanvas.height / rect.height;
-        const cx = (ev.clientX - rect.left) * scaleX;
-        const cy = (ev.clientY - rect.top) * scaleY;
-        if (cx >= geofence.x && cx <= geofence.x + geofence.w && cy >= geofence.y && cy <= geofence.y + geofence.h) {
-          state.waypoints.push({ x: Math.round(cx), y: Math.round(cy) });
-          if (state.waypoints.length > 8) state.waypoints.shift();
-          appendLog('PLAN WAYPOINT', 'เพิ่มจุดนำทางใหม่ (' + Math.round(cx) + ', ' + Math.round(cy) + ')');
-        }
-      });
-
-      // Real MQTT over WebSocket Connection
-      el.mqttConnectBtn.addEventListener('click', function () {
-        const url = el.mqttUrlInput.value.trim();
-        const prefix = (el.mqttTopicPrefix.value || 'esp32/sprayer01').trim();
-        if (!url) return;
-        if (typeof window.mqtt === 'undefined') {
-          appendLog('MQTT LIB', 'ไม่พบไลบรารี MQTT.js จาก CDN คงสถานะโหมดจำลอง', 'err');
-          return;
-        }
-        if (state.mqttClient) {
-          try { state.mqttClient.end(true); } catch (e) {}
-        }
-
-        const opts = {
-          connectTimeout: 5000,
-          clientId: 'web_ctrl_' + Math.random().toString(16).slice(2, 8)
-        };
-        if (el.mqttUserInput.value.trim()) opts.username = el.mqttUserInput.value.trim();
-        if (el.mqttPassInput.value) opts.password = el.mqttPassInput.value;
-
-        appendLog('MQTT CONNECT', 'กำลังเชื่อมต่อไปยัง ' + url + ' ...');
-        try {
-          const client = window.mqtt.connect(url, opts);
-          state.mqttClient = client;
-
-          client.on('connect', function () {
-            state.mqttConnected = true;
-            state.simulation = false;
-            const subTopic = prefix + '/telemetry';
-            client.subscribe(subTopic);
-            appendLog('MQTT OK', 'เชื่อมต่อสำเร็จ Subscribe: ' + subTopic);
-            renderUI();
-          });
-
-          client.on('message', function (topic, message) {
-            try {
-              const data = JSON.parse(message.toString());
-              if (typeof data.lat === 'number') state.baseLat = data.lat;
-              if (typeof data.lon === 'number') state.baseLon = data.lon;
-              if (typeof data.batteryPct === 'number') state.batteryPct = data.batteryPct;
-              if (typeof data.batteryVolt === 'number') state.batteryVolt = data.batteryVolt;
-              if (typeof data.currentAmp === 'number') state.currentAmp = data.currentAmp;
-              if (typeof data.tankLiters === 'number') state.tankLiters = data.tankLiters;
-              if (typeof data.flowRateLpm === 'number') state.actualFlowLpm = data.flowRateLpm;
-              if (typeof data.totalVolumeL === 'number') state.totalVolumeL = data.totalVolumeL;
-              if (typeof data.pressureBar === 'number') state.pressureBar = data.pressureBar;
-              if (typeof data.speedKmh === 'number') state.currentSpeedKmh = data.speedKmh;
-              if (typeof data.headingDeg === 'number') state.headingDeg = data.headingDeg;
-              if (typeof data.lidarDistCm === 'number') state.lidarDistCm = data.lidarDistCm;
-              state.heartbeatSec = 0;
-              appendLog('SUB ' + topic, message.toString());
-              renderUI();
-            } catch (err) {
-              appendLog('SUB RAW', message.toString());
-            }
-          });
-
-          client.on('error', function (err) {
-            appendLog('MQTT ERROR', err.message || 'ไม่สามารถเชื่อมต่อได้', 'err');
-          });
-
-          client.on('close', function () {
-            state.mqttConnected = false;
-            renderUI();
-          });
-        } catch (err) {
-          appendLog('MQTT EXCEPTION', err.message, 'err');
-        }
-      });
-
-      el.mqttSimBtn.addEventListener('click', function () {
-        if (state.mqttClient) {
-          try { state.mqttClient.end(true); } catch (e) {}
-          state.mqttClient = null;
-        }
-        state.mqttConnected = false;
-        state.simulation = true;
-        appendLog('MODE SIM', 'สลับกลับเป็นโหมดจำลองการทำงานของฮาร์ดแวร์ ESP32');
-        renderUI();
-      });
-
-      // Simulation Physics & Control Loop (10 Hz)
-      let lastBeepTs = 0;
-      function stepSimulation(dtSec) {
-        if (!state.simulation) return;
-
-        // Check LiDAR distance to simulated obstacle
-        if (state.obstacleActive) {
-          const dx = state.obstacleX - state.x;
-          const dy = state.obstacleY - state.y;
-          const distPx = Math.hypot(dx, dy);
-          const angleToObs = Math.atan2(dy, dx) * (180 / Math.PI);
-          let diffDeg = Math.abs(((angleToObs - state.headingDeg + 540) % 360) - 180);
-          if (diffDeg < 42) {
-            state.lidarDistCm = Math.max(25, Math.round(distPx * 3.2));
+            // Spray outward to left/right crop rows + slightly upward
+            const outVec = new THREE.Vector3(
+              side * (2.4 + Math.random() * 1.4),
+              0.35 + (Math.random() - 0.3) * 0.8,
+              0.4 + Math.random() * 0.6
+            );
+            outVec.applyAxisAngle(new THREE.Vector3(0, 1, 0), state.heading);
+            p.vx = outVec.x;
+            p.vy = outVec.y;
+            p.vz = outVec.z;
+            p.life = 0.25 + Math.random() * 0.45;
           } else {
-            state.lidarDistCm = 310;
+            posArr[i * 3 + 1] = -10;
           }
         } else {
-          state.lidarDistCm = 320;
+          posArr[i * 3]     += p.vx * dt;
+          posArr[i * 3 + 1] += p.vy * dt;
+          posArr[i * 3 + 2] += p.vz * dt;
+          p.vy -= 1.8 * dt; // gravity
         }
+      }
+      particleGeo.attributes.position.needsUpdate = true;
 
-        const obstacleTooClose = state.lidarDistCm < 95;
-        const tankEmpty = state.tankLiters <= 0.05;
-        const battLow = state.batteryPct <= 12.0;
+      // 4. Battery & Current Simulation (INA219 / INA226)
+      let ampDraw = 0.65; // ESP32 + 4G Modem + Sensors base load
+      if (state.currentSpeedKmh > 0.1) ampDraw += 2.25;
+      if (activelySpraying) ampDraw += 1.40;
+      if (state.fansOn && !state.eStop) ampDraw += 0.50;
+      state.currentAmp = ampDraw;
+      state.batteryPct = Math.max(0, state.batteryPct - dt * 0.012);
+      state.voltageV = 11.1 + (state.batteryPct / 100) * 1.5;
 
-        // Fault detection (Step 7)
-        if (state.estop) {
-          state.faultMessage = 'กดปุ่มหยุดฉุกเฉิน (E-Stop Engaged)';
-          state.activeStep = 7;
-        } else if (!state.contactorOn) {
-          state.faultMessage = 'ปิดสวิตช์หลัก Contactor 12V';
-          state.activeStep = 3;
-        } else if (obstacleTooClose) {
-          state.faultMessage = 'LiDAR ตรวจพบสิ่งกีดขวาง (' + state.lidarDistCm + ' cm) — หยุดรถ/หยุดพ่นอัตโนมัติ';
-          state.activeStep = 7;
-          if (state.buzzerAuto && Date.now() - lastBeepTs > 2200) {
-            playBeep(740, 120);
-            lastBeepTs = Date.now();
-          }
-        } else if (tankEmpty) {
-          state.faultMessage = 'น้ำยาในถังหมด (Tank Empty) — ปิดปั๊มและวาล์วอัตโนมัติ';
-          state.pumpOn = false;
-          state.valveOpen = false;
-          state.activeStep = 7;
-        } else if (!state.insideGeofence) {
-          state.faultMessage = 'ออกนอกขอบเขตแปลง (Geofence Breach)';
-          state.activeStep = 7;
-        } else if (battLow) {
-          state.faultMessage = 'แบตเตอรี่ต่ำกว่ากำหนด (Low Battery BMS)';
-          state.activeStep = 7;
-        } else {
-          state.faultMessage = '';
-        }
+      // 5. Update Main Camera (1st Person FPV vs 3rd Person vs Free Orbit)
+      if (state.cameraMode === 'fpv') {
+        // Mounted at front sensor head looking ahead
+        const camOffset = new THREE.Vector3(0, 1.08, -0.88);
+        camOffset.applyAxisAngle(new THREE.Vector3(0, 1, 0), state.heading);
+        mainCamera.position.set(state.x + camOffset.x, camOffset.y, state.z + camOffset.z);
 
-        // Autonomous Navigation logic
-        let activeMotion = state.driveCmd;
-        if (state.autonomous && !state.estop && state.contactorOn && !obstacleTooClose && !tankEmpty) {
-          const targetWp = state.waypoints[state.wpIndex];
-          if (targetWp) {
-            const dx = targetWp.x - state.x;
-            const dy = targetWp.y - state.y;
-            const dist = Math.hypot(dx, dy);
-            if (dist < 12) {
-              state.wpIndex = (state.wpIndex + 1) % state.waypoints.length;
-            } else {
-              const desiredDeg = (Math.atan2(dy, dx) * 180) / Math.PI;
-              let delta = ((desiredDeg - state.headingDeg + 540) % 360) - 180;
-              if (Math.abs(delta) > 10) {
-                state.headingDeg = (state.headingDeg + Math.sign(delta) * 75 * dtSec + 360) % 360;
-                activeMotion = delta > 0 ? 'right' : 'left';
-                state.activeStep = 2;
-              } else {
-                activeMotion = 'forward';
-                state.activeStep = (state.pumpOn && state.valveOpen) ? 4 : 2;
-              }
-            }
-          }
-        } else if (!state.autonomous && !state.faultMessage) {
-          if (state.pumpOn && state.valveOpen) {
-            state.activeStep = 5;
-          } else if (activeMotion !== 'stop') {
-            state.activeStep = 2;
-          } else {
-            state.activeStep = 3;
-          }
-        }
-
-        // Stop forward motion if obstacle too close or fault
-        if (state.estop || !state.contactorOn || (obstacleTooClose && activeMotion === 'forward')) {
-          activeMotion = 'stop';
-        }
-
-        // Kinematics update
-        const pxPerMeter = 10;
-        let speedMps = 0;
-        if (activeMotion === 'forward') {
-          state.currentSpeedKmh = state.targetSpeedKmh;
-          speedMps = state.currentSpeedKmh / 3.6;
-        } else if (activeMotion === 'backward') {
-          state.currentSpeedKmh = state.targetSpeedKmh * 0.7;
-          speedMps = -state.currentSpeedKmh / 3.6;
-        } else if (activeMotion === 'left') {
-          state.currentSpeedKmh = state.targetSpeedKmh * 0.75;
-          speedMps = state.currentSpeedKmh / 3.6;
-          state.headingDeg = (state.headingDeg - 55 * dtSec + 360) % 360;
-        } else if (activeMotion === 'right') {
-          state.currentSpeedKmh = state.targetSpeedKmh * 0.75;
-          speedMps = state.currentSpeedKmh / 3.6;
-          state.headingDeg = (state.headingDeg + 55 * dtSec + 360) % 360;
-        } else if (activeMotion === 'spin-left') {
-          state.currentSpeedKmh = 1.2;
-          state.headingDeg = (state.headingDeg - 85 * dtSec + 360) % 360;
-        } else if (activeMotion === 'spin-right') {
-          state.currentSpeedKmh = 1.2;
-          state.headingDeg = (state.headingDeg + 85 * dtSec + 360) % 360;
-        } else {
-          state.currentSpeedKmh = 0.0;
-        }
-
-        if (speedMps !== 0) {
-          const rad = (state.headingDeg * Math.PI) / 180;
-          const distM = Math.abs(speedMps) * dtSec;
-          state.x = Math.max(18, Math.min(el.fieldCanvas.width - 18, state.x + Math.cos(rad) * speedMps * pxPerMeter * dtSec));
-          state.y = Math.max(18, Math.min(el.fieldCanvas.height - 18, state.y + Math.sin(rad) * speedMps * pxPerMeter * dtSec));
-          state.odometryM += distM;
-        }
-
-        // Check Geofence
-        state.insideGeofence = (
-          state.x >= geofence.x &&
-          state.x <= geofence.x + geofence.w &&
-          state.y >= geofence.y &&
-          state.y <= geofence.y + geofence.h
+        const lookTarget = new THREE.Vector3(0, 0.92, -8.0);
+        lookTarget.applyAxisAngle(new THREE.Vector3(0, 1, 0), state.heading);
+        mainCamera.lookAt(state.x + lookTarget.x, lookTarget.y, state.z + lookTarget.z);
+      } else if (state.cameraMode === 'tps') {
+        // 3rd Person Chase Camera behind and above the robot
+        const chaseOffset = new THREE.Vector3(0, 2.85, 4.3);
+        chaseOffset.applyAxisAngle(new THREE.Vector3(0, 1, 0), state.heading);
+        mainCamera.position.lerp(
+          new THREE.Vector3(state.x + chaseOffset.x, chaseOffset.y, state.z + chaseOffset.z),
+          0.12
         );
+        mainCamera.lookAt(state.x, 0.85, state.z);
+      } else {
+        // Orbit Inspect around robot
+        orbitAngle += dt * 0.45;
+        mainCamera.position.set(
+          state.x + Math.cos(orbitAngle) * 3.8,
+          2.2,
+          state.z + Math.sin(orbitAngle) * 3.8
+        );
+        mainCamera.lookAt(state.x, 0.75, state.z);
+      }
 
-        // Sprayer Hydraulics (12V Pump + Solenoid Valve + Water Flow Meter + Pressure Sensor)
-        const canSpray = state.contactorOn && !state.estop && !obstacleTooClose && state.tankLiters > 0.05;
-        if (canSpray && state.pumpOn && state.valveOpen) {
-          state.actualFlowLpm = state.targetFlowLpm;
-          state.pressureBar = +(1.15 + state.actualFlowLpm * 0.66).toFixed(2);
-          const usedL = (state.actualFlowLpm / 60) * dtSec;
-          state.tankLiters = Math.max(0, state.tankLiters - usedL);
-          state.totalVolumeL += usedL;
+      // 6. Update 3D Minimap Camera (Tilted 3D overhead radar tracking the robot)
+      miniCamera.position.set(state.x, 22, state.z + 9);
+      miniCamera.lookAt(state.x, 0, state.z - 1);
+    }
 
-          if (speedMps !== 0 || state.sprayTrail.length === 0) {
-            const lastPt = state.sprayTrail[state.sprayTrail.length - 1];
-            if (!lastPt || Math.hypot(lastPt.x - state.x, lastPt.y - state.y) > 5) {
-              state.sprayTrail.push({ x: state.x, y: state.y });
-              if (state.sprayTrail.length > 450) state.sprayTrail.shift();
-            }
+    function resizeCanvases() {
+      const rect = mainCanvas.parentElement.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0) {
+        renderer.setSize(rect.width, rect.height, false);
+        mainCamera.aspect = rect.width / rect.height;
+        mainCamera.updateProjectionMatrix();
+      }
+      const miniRect = miniCanvas.parentElement.getBoundingClientRect();
+      if (miniRect.width > 0 && miniRect.height > 0) {
+        miniRenderer.setSize(miniRect.width, miniRect.height, false);
+        miniCamera.aspect = miniRect.width / miniRect.height;
+        miniCamera.updateProjectionMatrix();
+      }
+    }
+    window.addEventListener('resize', resizeCanvases);
+
+    /********************************************************************
+     * 7. TELEMETRY UI & REAL MAP SYNCHRONIZATION (5 Hz Refresh)
+     ********************************************************************/
+    let lastUiUpdate = 0;
+
+    function updateDashboardUI() {
+      const lat = (BASE_LAT - state.z * METER_TO_DEG).toFixed(6);
+      const lon = (BASE_LON + state.x * METER_TO_DEG).toFixed(6);
+      const degHeading = (((-state.heading * 180 / Math.PI) % 360) + 360) % 360;
+      const wheelRpm = Math.round((state.currentSpeedKmh / 3.6) * 28);
+      const tankPct = Math.round((state.tankLevelL / state.tankCapacityL) * 100);
+      const battPct = Math.round(state.batteryPct);
+      const sprayedCount = trees.filter(t => t.sprayed).length;
+      const coveragePct = Math.round((sprayedCount / trees.length) * 100);
+
+      // Camera OSD
+      document.getElementById('osdHeading').textContent =
+        `IMU YAW: ${degHeading.toFixed(1)}° | PITCH: 0.2° | ROLL: -0.1°`;
+      document.getElementById('osdWheelEncoders').textContent =
+        `WHEEL ENCODERS (4x): FL ${wheelRpm} RPM | FR ${wheelRpm} RPM`;
+      document.getElementById('minimapStats').textContent = `Sprayed: ${coveragePct}%`;
+
+      const obsEl = document.getElementById('hudObstacleDist');
+      if (state.obstacleDetected) {
+        obsEl.textContent = `⚠️ OBSTACLE (${state.obstacleDistM.toFixed(2)} m)`;
+        obsEl.style.color = '#ef4444';
+      } else {
+        obsEl.textContent = `Clear (${state.obstacleDistM.toFixed(2)} m)`;
+        obsEl.style.color = '#4ade80';
+      }
+
+      const activelySpraying = state.sprayerOn && !state.eStop && state.tankLevelL > 0.01;
+      const sprayEl = document.getElementById('hudSprayState');
+      sprayEl.textContent = activelySpraying ? 'ON (ฉีดพ่นปกติ)' : 'OFF (หยุดพ่น)';
+      sprayEl.style.color = activelySpraying ? '#38bdf8' : '#f59e0b';
+
+      // MQTT Dashboard Right Panel
+      document.getElementById('mqttLat').textContent = `Lat: ${lat}`;
+      document.getElementById('mqttLon').textContent = `Lon: ${lon}`;
+      document.getElementById('mapCoordText').textContent = `Lat: ${lat}, Lon: ${lon} (Fix: 3D RTK)`;
+
+      document.getElementById('mqttBattPct').textContent = `${battPct}%`;
+      document.getElementById('mqttBattAmp').textContent = `${state.currentAmp.toFixed(1)} A (${state.voltageV.toFixed(1)}V)`;
+      document.getElementById('mqttBattBar').style.width = `${battPct}%`;
+
+      document.getElementById('mqttTankPct').textContent = `${tankPct}%`;
+      document.getElementById('mqttTankLiters').textContent = `(${state.tankLevelL.toFixed(2)} L / 10.0 L)`;
+      document.getElementById('mqttTankBar').style.width = `${tankPct}%`;
+
+      document.getElementById('mqttFlowRate').textContent = state.actualFlowLmin.toFixed(2);
+      document.getElementById('mqttTotalVol').textContent = `${state.totalVolumeL.toFixed(2)} L`;
+      document.getElementById('mqttPressure').textContent = `${state.pressureBar.toFixed(2)} bar`;
+      document.getElementById('mqttValveText').textContent = activelySpraying ? 'Solenoid: OPEN' : 'Solenoid: CLOSED';
+
+      document.getElementById('mqttSpeed').textContent = `${state.currentSpeedKmh.toFixed(1)} km/h`;
+      document.getElementById('mqttDistance').textContent = `Dist: ${state.distanceTraveled.toFixed(1)} m`;
+
+      const pumpEl = document.getElementById('mqttPumpStatus');
+      pumpEl.textContent = activelySpraying ? '● ON' : '○ OFF';
+      pumpEl.style.color = activelySpraying ? '#4ade80' : '#f87171';
+      document.getElementById('mqttFanStatus').textContent = `DIY Fans: ${state.fansOn && !state.eStop ? 'ON' : 'OFF'}`;
+
+      // Hardware Architecture live values
+      document.getElementById('hwTankText').textContent = `${state.tankLevelL.toFixed(2)} L`;
+      document.getElementById('hwPumpText').textContent = activelySpraying ? 'ON' : 'OFF';
+      document.getElementById('hwFanText').textContent = (state.fansOn && !state.eStop) ? 'ACTIVE' : 'STOPPED';
+      document.getElementById('hwLidarText').textContent = state.obstacleDetected ? 'ALERT!' : 'Clear';
+      document.getElementById('hwEncoderText').textContent = `${wheelRpm} RPM`;
+      document.getElementById('hwFlowPressText').textContent = `${state.actualFlowLmin.toFixed(2)}L/m | ${state.pressureBar.toFixed(2)}bar`;
+      document.getElementById('hwBattVolt').textContent = `${state.voltageV.toFixed(1)} V (${battPct}%)`;
+      document.getElementById('hwCurrent').textContent = `${state.currentAmp.toFixed(1)} A`;
+      state.sdLogRows += 1;
+      document.getElementById('hwSdCount').textContent = `${state.sdLogRows.toLocaleString()} rows`;
+      document.getElementById('hwEstopState').textContent = state.eStop ? 'TRIGGERED!' : 'NORMAL';
+      document.getElementById('hwEstopState').style.color = state.eStop ? '#ef4444' : '#4ade80';
+
+      // Status LEDs (Red / Yellow / Green) & Alarms
+      const hasFault = state.eStop || state.obstacleDetected || state.tankLevelL <= 0.05;
+      document.getElementById('ledRed').classList.toggle('on', hasFault);
+      document.getElementById('ledYellow').classList.toggle('on', activelySpraying);
+      document.getElementById('ledGreen').classList.toggle('on', !state.eStop);
+
+      const alarmTile = document.getElementById('mqttAlarmTile');
+      const alarmText = document.getElementById('mqttAlarmText');
+      const buzzerHud = document.getElementById('hudBuzzer');
+
+      if (state.eStop) {
+        alarmTile.style.borderColor = '#ef4444';
+        alarmText.style.color = '#f87171';
+        alarmText.textContent = '🚨 EMERGENCY STOP ACTIVE (กดปุ่มหยุดฉุกเฉิน - ตัดการทำงานปั๊มและมอเตอร์)';
+        buzzerHud.textContent = 'BEEPING (ALARM)';
+        buzzerHud.style.color = '#ef4444';
+      } else if (state.obstacleDetected) {
+        alarmTile.style.borderColor = '#f59e0b';
+        alarmText.style.color = '#fbbf24';
+        alarmText.textContent = `⚠️ LiDAR/ToF ตรวจพบสิ่งกีดขวางที่ระยะ ${state.obstacleDistM.toFixed(2)} m (กำลังหลบหลีกอัตโนมัติ)`;
+        buzzerHud.textContent = 'BEEP WARNING';
+        buzzerHud.style.color = '#f59e0b';
+      } else if (state.tankLevelL <= 0.05) {
+        alarmTile.style.borderColor = '#f59e0b';
+        alarmText.style.color = '#fbbf24';
+        alarmText.textContent = '⚠️ น้ำยาในถังหมด (Tank Empty - ปิดปั๊มน้ำยาอัตโนมัติ)';
+        buzzerHud.textContent = 'LOW TANK BEEP';
+        buzzerHud.style.color = '#f59e0b';
+      } else {
+        alarmTile.style.borderColor = '#10b981';
+        alarmText.style.color = '#4ade80';
+        alarmText.textContent = '✔ No Fault (ระบบทำงานปกติ)';
+        buzzerHud.textContent = 'SILENT';
+        buzzerHud.style.color = '#94a3b8';
+      }
+
+      // Highlight active step in 7-Step Autonomous Flow
+      for (let i = 1; i <= 7; i++) {
+        const el = document.getElementById('step' + i);
+        el.classList.remove('active', 'fault');
+      }
+      if (hasFault) {
+        document.getElementById('step7').classList.add('fault');
+        document.getElementById('currentStepBadge').textContent = 'สถานะปัจจุบัน: ขั้นตอนที่ 7 กรณีผิดปกติ (Fault Handling)';
+      } else if (activelySpraying) {
+        document.getElementById('step4').classList.add('active');
+        document.getElementById('step5').classList.add('active');
+        document.getElementById('step6').classList.add('active');
+        document.getElementById('currentStepBadge').textContent = 'สถานะปัจจุบัน: ขั้นตอนที่ 4-6 นำทาง ฉีดพ่น และบันทึกข้อมูล MQTT';
+      } else {
+        document.getElementById('step2').classList.add('active');
+        document.getElementById('step3').classList.add('active');
+        document.getElementById('currentStepBadge').textContent = 'สถานะปัจจุบัน: ขั้นตอนที่ 2-3 นำทางและตรวจสอบความปลอดภัย';
+      }
+
+      // Update JSON Telemetry Preview
+      const payload = {
+        device: "ESP32-AgriSprayer-01",
+        mode: state.driveMode.toUpperCase(),
+        gps: { lat: parseFloat(lat), lon: parseFloat(lon), fix: "3D" },
+        imu_yaw_deg: parseFloat(degHeading.toFixed(1)),
+        battery: { pct: battPct, voltage_v: parseFloat(state.voltageV.toFixed(2)), current_a: parseFloat(state.currentAmp.toFixed(2)) },
+        sprayer: {
+          pump_on: activelySpraying,
+          fans_on: state.fansOn && !state.eStop,
+          tank_pct: tankPct,
+          tank_l: parseFloat(state.tankLevelL.toFixed(2)),
+          flow_lmin: parseFloat(state.actualFlowLmin.toFixed(2)),
+          pressure_bar: parseFloat(state.pressureBar.toFixed(2)),
+          total_vol_l: parseFloat(state.totalVolumeL.toFixed(2))
+        },
+        fault: hasFault ? "ACTIVE" : "NONE"
+      };
+      document.getElementById('mqttJsonPreview').textContent = JSON.stringify(payload, null, 2);
+
+      // Update Real Map Marker & Polyline
+      if (robotMarker && sprayPolyline) {
+        const latNum = parseFloat(lat);
+        const lonNum = parseFloat(lon);
+        robotMarker.setLatLng([latNum, lonNum]);
+        if (activelySpraying) {
+          const lastPt = gpsTrailCoords[gpsTrailCoords.length - 1];
+          if (!lastPt || Math.hypot(latNum - lastPt[0], lonNum - lastPt[1]) > 0.000004) {
+            gpsTrailCoords.push([latNum, lonNum]);
+            if (gpsTrailCoords.length > 250) gpsTrailCoords.shift();
+            sprayPolyline.setLatLngs(gpsTrailCoords);
           }
-        } else if (canSpray && state.pumpOn && !state.valveOpen) {
-          // Pump on against closed solenoid valve -> slightly elevated static pressure, zero flow
-          state.actualFlowLpm = 0.0;
-          state.pressureBar = 2.85;
-        } else {
-          state.actualFlowLpm = 0.0;
-          state.pressureBar = 0.0;
         }
-
-        // Electrical Current Calculation (INA219/INA226)
-        let amps = 0.35; // ESP32 + 4G Modem + Sensors via Buck 12V->5V
-        if (state.contactorOn && !state.estop) {
-          if (state.currentSpeedKmh > 0) amps += 1.6 + (state.currentSpeedKmh / 6.0) * 1.4;
-          if (state.pumpOn && canSpray) amps += 1.45;
-          if (state.valveOpen && canSpray) amps += 0.35;
-          if (state.fanOn) amps += 0.45;
-        }
-        state.currentAmp = +amps.toFixed(1);
-        state.batteryPct = Math.max(5, state.batteryPct - (state.currentAmp * dtSec) / 900);
-        state.batteryVolt = +(11.1 + (state.batteryPct / 100) * 1.7).toFixed(1);
       }
+    }
 
-      // Draw GPS Geofence Canvas
-      function drawFieldMap() {
-        const w = el.fieldCanvas.width;
-        const h = el.fieldCanvas.height;
-        ctx.clearRect(0, 0, w, h);
+    function animate(now) {
+      requestAnimationFrame(animate);
+      const dt = Math.min(0.05, (now - lastTime) / 1000);
+      lastTime = now;
 
-        // Subtle crop rows grid
-        ctx.strokeStyle = 'rgba(34, 197, 94, 0.12)';
-        ctx.lineWidth = 1;
-        for (let y = geofence.y + 20; y < geofence.y + geofence.h; y += 28) {
-          ctx.beginPath();
-          ctx.moveTo(geofence.x, y);
-          ctx.lineTo(geofence.x + geofence.w, y);
-          ctx.stroke();
-        }
+      updateSimulation(dt);
 
-        // Geofence Boundary
-        ctx.strokeStyle = state.insideGeofence ? '#10b981' : '#ef4444';
-        ctx.lineWidth = 2;
-        ctx.setLineDash([7, 5]);
-        ctx.strokeRect(geofence.x, geofence.y, geofence.w, geofence.h);
-        ctx.setLineDash([]);
+      // Render Main 3D Monitor (1st / 3rd Person)
+      renderer.render(scene, mainCamera);
+      // Render 3D Minimap PiP
+      miniRenderer.render(scene, miniCamera);
 
-        ctx.fillStyle = 'rgba(16, 185, 129, 0.75)';
-        ctx.font = '11px "JetBrains Mono", monospace';
-        ctx.fillText('GEOFENCE BOUNDARY', geofence.x + 8, geofence.y + 15);
-
-        // Sprayed Chemical Swath Trail
-        if (state.sprayTrail.length > 0) {
-          ctx.fillStyle = 'rgba(56, 189, 248, 0.28)';
-          for (let i = 0; i < state.sprayTrail.length; i++) {
-            const pt = state.sprayTrail[i];
-            ctx.beginPath();
-            ctx.arc(pt.x, pt.y, 11, 0, Math.PI * 2);
-            ctx.fill();
-          }
-        }
-
-        // Autonomous Waypoints Path
-        if (state.waypoints.length > 0) {
-          ctx.strokeStyle = 'rgba(250, 204, 21, 0.45)';
-          ctx.lineWidth = 1.5;
-          ctx.beginPath();
-          state.waypoints.forEach(function (wp, idx) {
-            if (idx === 0) ctx.moveTo(wp.x, wp.y);
-            else ctx.lineTo(wp.x, wp.y);
-          });
-          ctx.stroke();
-
-          state.waypoints.forEach(function (wp, idx) {
-            const isTarget = state.autonomous && idx === state.wpIndex;
-            ctx.fillStyle = isTarget ? '#facc15' : 'rgba(250, 204, 21, 0.7)';
-            ctx.beginPath();
-            ctx.arc(wp.x, wp.y, isTarget ? 6 : 4, 0, Math.PI * 2);
-            ctx.fill();
-          });
-        }
-
-        // Simulated Obstacle
-        if (state.obstacleActive) {
-          ctx.fillStyle = '#ef4444';
-          ctx.beginPath();
-          ctx.arc(state.obstacleX, state.obstacleY, 11, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.strokeStyle = '#fecaca';
-          ctx.lineWidth = 2;
-          ctx.stroke();
-          ctx.fillStyle = '#fecaca';
-          ctx.fillText('สิ่งกีดขวาง', state.obstacleX - 24, state.obstacleY - 15);
-        }
-
-        // Rover Pose + LiDAR Cone
-        ctx.save();
-        ctx.translate(state.x, state.y);
-        ctx.rotate((state.headingDeg * Math.PI) / 180);
-
-        // LiDAR / Ultrasonic Sensing Cone
-        ctx.fillStyle = state.lidarDistCm < 95 ? 'rgba(239, 68, 68, 0.28)' : 'rgba(52, 211, 153, 0.16)';
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.arc(0, 0, 56, -0.42, 0.42);
-        ctx.closePath();
-        ctx.fill();
-
-        // Rear Spray Mist Cone when active
-        if (state.contactorOn && !state.estop && state.pumpOn && state.valveOpen && state.actualFlowLpm > 0) {
-          ctx.fillStyle = 'rgba(56, 189, 248, 0.45)';
-          ctx.beginPath();
-          ctx.moveTo(-12, -8);
-          ctx.lineTo(-34, -18);
-          ctx.lineTo(-34, 18);
-          ctx.lineTo(-12, 8);
-          ctx.closePath();
-          ctx.fill();
-        }
-
-        // 4 Tires
-        ctx.fillStyle = '#090d0c';
-        ctx.fillRect(-13, -13, 8, 4);
-        ctx.fillRect(5, -13, 8, 4);
-        ctx.fillRect(-13, 9, 8, 4);
-        ctx.fillRect(5, 9, 8, 4);
-
-        // Red Metal Tube Frame
-        ctx.fillStyle = '#dc2626';
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 1.2;
-        ctx.beginPath();
-        if (typeof ctx.roundRect === 'function') {
-          ctx.roundRect(-14, -9, 28, 18, 4);
-        } else {
-          ctx.rect(-14, -9, 28, 18);
-        }
-        ctx.fill();
-        ctx.stroke();
-
-        // White Chemical Tank on Rover
-        ctx.fillStyle = '#e2e8f0';
-        ctx.fillRect(-8, -6, 13, 12);
-
-        // Heading Nose Indicator
-        ctx.fillStyle = '#facc15';
-        ctx.beginPath();
-        ctx.moveTo(15, 0);
-        ctx.lineTo(8, -5);
-        ctx.lineTo(8, 5);
-        ctx.closePath();
-        ctx.fill();
-
-        ctx.restore();
+      if (now - lastUiUpdate > 200) {
+        updateDashboardUI();
+        lastUiUpdate = now;
       }
+    }
 
-      // Render DOM Telemetry & Controls
-      function renderUI() {
-        // Compute live GPS coordinates from baseLat/baseLon + meter offset
-        const lat = state.baseLat - ((state.y - 195) / 10) * 0.000009;
-        const lon = state.baseLon + ((state.x - 150) / 10) * 0.000009;
-        el.latLonDisplay.textContent = lat.toFixed(4) + ', ' + lon.toFixed(4);
-        el.geofenceStatus.textContent = state.insideGeofence ? 'Geofence: อยู่ในเขตแปลง' : 'Geofence: ออกนอกเขตแปลง!';
-        el.geofenceStatus.style.color = state.insideGeofence ? '#86efac' : '#f87171';
-
-        // Data mode badge
-        if (state.simulation) {
-          el.dataModeBadge.textContent = 'โหมดจำลองข้อมูล (Simulation ตามค่าในแผนภาพ)';
-          el.dataModeBadge.classList.remove('live');
-          el.mqttBrokerState.textContent = 'SIMULATED BROKER';
-        } else {
-          el.dataModeBadge.textContent = 'เชื่อมต่อ MQTT Live (TLS/SSL)';
-          el.dataModeBadge.classList.add('live');
-          el.mqttBrokerState.textContent = 'CONNECTED (TLS/SSL)';
-        }
-
-        // Battery & INA226
-        const battRounded = Math.round(state.batteryPct);
-        el.battPctText.textContent = battRounded + '%';
-        el.battVoltText.textContent = '(' + state.batteryVolt.toFixed(1) + 'V)';
-        el.inaCurrentText.textContent = state.currentAmp.toFixed(1) + ' A';
-        el.battBar.style.width = battRounded + '%';
-        el.battBar.className = 'meter-fill' + (battRounded <= 20 ? ' danger' : (battRounded <= 40 ? ' warn' : ''));
-
-        // Tank Level
-        const tankPct = Math.round((state.tankLiters / state.tankCapacityL) * 100);
-        el.tankPctText.textContent = tankPct + '%';
-        el.tankLiterText.textContent = state.tankLiters.toFixed(1) + ' L / 10 L';
-        el.tankBar.style.width = tankPct + '%';
-        el.tankBar.className = 'meter-fill ' + (tankPct <= 15 ? 'danger' : 'blue');
-
-        // Flow & Pressure
-        el.flowRateText.textContent = state.actualFlowLpm.toFixed(2);
-        el.totalVolText.textContent = state.totalVolumeL.toFixed(2);
-        el.pressureText.textContent = state.pressureBar.toFixed(2);
-        const pumpActive = state.contactorOn && !state.estop && state.pumpOn;
-        const valveActive = state.contactorOn && !state.estop && state.valveOpen;
-        el.pumpStateChip.textContent = 'Pump: ' + (pumpActive ? 'ON' : 'OFF');
-        el.valveStateSub.textContent = 'Solenoid Valve: ' + (valveActive ? 'OPEN' : 'CLOSED');
-
-        // Speed, Wheel Encoders & Motor Status
-        el.speedText.textContent = state.currentSpeedKmh.toFixed(1);
-        const motorOk = state.contactorOn && !state.estop;
-        el.motorStatusText.textContent = motorOk ? 'Motor L: OK • R: OK' : 'Motor L: STOP • R: STOP';
-        el.motorStatusText.style.color = motorOk ? '#86efac' : '#fca5a5';
-
-        const baseRpm = Math.round((state.currentSpeedKmh / 3.6) * 96);
-        let rpmL = baseRpm;
-        let rpmR = baseRpm;
-        if (state.driveCmd === 'left' || state.driveCmd === 'spin-left') rpmL = Math.round(baseRpm * 0.45);
-        if (state.driveCmd === 'right' || state.driveCmd === 'spin-right') rpmR = Math.round(baseRpm * 0.45);
-        el.encFrontText.textContent = rpmL + ' / ' + rpmR + ' RPM';
-        el.encRearText.textContent = rpmL + ' / ' + rpmR + ' RPM';
-        const pwmPct = state.currentSpeedKmh > 0 ? Math.round((state.currentSpeedKmh / 6.0) * 100) : 0;
-        el.pwmDriverText.textContent = 'L: ' + pwmPct + '% | R: ' + pwmPct + '%';
-        el.odometryText.textContent = state.odometryM.toFixed(1) + ' m';
-
-        // IMU & LiDAR Overlays
-        const compassHeading = Math.round((state.headingDeg + 90) % 360);
-        el.imuOverlayChip.textContent = 'IMU Yaw: ' + compassHeading + '° | Pitch: ' + state.pitchDeg.toFixed(1) + '° | Roll: ' + state.rollDeg.toFixed(1) + '°';
-        el.lidarOverlayChip.textContent = 'LiDAR/ToF หน้า: ' + state.lidarDistCm + ' cm (' + (state.lidarDistCm < 95 ? 'พบสิ่งกีดขวาง!' : 'ปลอดภัย') + ')';
-        el.lidarOverlayChip.style.borderColor = state.lidarDistCm < 95 ? '#ef4444' : 'rgba(16,185,129,0.35)';
-
-        // Alarms / Faults & Status LEDs
-        const hasFault = Boolean(state.faultMessage);
-        el.ledGreen.classList.toggle('on', !hasFault && state.contactorOn);
-        el.ledAmber.classList.toggle('on', !hasFault && pumpActive && valveActive);
-        el.ledRed.classList.toggle('on', hasFault);
-
-        if (hasFault) {
-          el.alarmMainText.textContent = '⚠ Fault Active';
-          el.alarmMainText.style.color = '#f87171';
-          el.alarmSubText.textContent = state.faultMessage;
-          el.alarmSubText.style.color = '#fca5a5';
-        } else {
-          el.alarmMainText.textContent = '✓ No Fault';
-          el.alarmMainText.style.color = '#4ade80';
-          el.alarmSubText.textContent = 'ระบบปกติ พร้อมทำงาน';
-          el.alarmSubText.style.color = '#86efac';
-        }
-
-        // E-Stop Button State
-        el.estopBtn.classList.toggle('latched', state.estop);
-        el.estopBtnLabel.textContent = state.estop ? 'ปลดล็อก E-STOP (คลิกเพื่อเริ่มใหม่)' : 'EMERGENCY STOP (หยุดฉุกเฉิน)';
-
-        // Actuator Switch Buttons
-        el.contactorToggle.classList.toggle('on', state.contactorOn);
-        el.contactorToggle.textContent = state.contactorOn ? 'ON' : 'OFF';
-
-        el.pumpToggle.disabled = state.estop || !state.contactorOn;
-        el.pumpToggle.classList.toggle('on', pumpActive);
-        el.pumpToggle.textContent = pumpActive ? 'ON' : 'OFF';
-
-        el.valveToggle.disabled = state.estop || !state.contactorOn;
-        el.valveToggle.classList.toggle('on', valveActive);
-        el.valveToggle.textContent = valveActive ? 'OPEN' : 'CLOSED';
-
-        const fanActive = state.contactorOn && !state.estop && state.fanOn;
-        el.fanToggle.disabled = state.estop || !state.contactorOn;
-        el.fanToggle.classList.toggle('on', fanActive);
-        el.fanToggle.textContent = fanActive ? 'ON' : 'OFF';
-
-        if (pumpActive && valveActive && state.actualFlowLpm > 0) {
-          el.flowLoopBadge.className = 'status-pill ok';
-          el.flowLoopBadge.textContent = '✓ ควบคุมอัตราการไหลอัตโนมัติ (' + state.actualFlowLpm.toFixed(2) + ' L/min • ' + state.pressureBar.toFixed(2) + ' bar)';
-        } else if (pumpActive && !valveActive) {
-          el.flowLoopBadge.className = 'status-pill warn';
-          el.flowLoopBadge.textContent = 'ปั๊มทำงานแต่วาล์วปิด (แรงดันค้างท่อ ' + state.pressureBar.toFixed(2) + ' bar)';
-        } else {
-          el.flowLoopBadge.className = 'status-pill warn';
-          el.flowLoopBadge.textContent = 'หยุดการฉีดพ่นชั่วคราว (Flow 0.00 L/min)';
-        }
-
-        // Power Nodes
-        el.pSubBatt.textContent = state.batteryVolt.toFixed(1) + 'V • ' + (battRounded > 15 ? 'BMS ปกติ' : 'แรงดันต่ำ');
-        const watts = (state.batteryVolt * state.currentAmp).toFixed(1);
-        el.pSubIna.textContent = watts + ' W (' + state.currentAmp.toFixed(1) + ' A)';
-        el.pNodeIna.classList.toggle('off', !state.contactorOn);
-
-        // Auxiliary
-        el.sdToggle.classList.toggle('on', state.sdLogging);
-        el.sdToggle.textContent = state.sdLogging ? 'REC' : 'PAUSE';
-        el.sdLogSub.textContent = (state.sdLogging ? 'กำลังบันทึกทุก 3 วินาที' : 'หยุดบันทึกชั่วคราว') + ' • บันทึกแล้ว ' + state.sdRecords + ' รายการ';
-
-        el.buzzerMuteToggle.classList.toggle('on', state.buzzerAuto);
-        el.buzzerMuteToggle.textContent = state.buzzerAuto ? 'AUTO' : 'MUTE';
-
-        // 7-Step Autonomous Operation Flow Highlight
-        const stepNames = {
-          1: 'ขั้นตอนที่ 1 — วางแผนงาน (Plan)',
-          2: 'ขั้นตอนที่ 2 — นำทาง (Navigate)',
-          3: 'ขั้นตอนที่ 3 — ตรวจสอบความปลอดภัย (Safety Check)',
-          4: 'ขั้นตอนที่ 4 — ฉีดพ่นตามเป้าหมาย (Spray by Target Flow)',
-          5: 'ขั้นตอนที่ 5 — ตรวจสอบการไหล (Verify Flow)',
-          6: 'ขั้นตอนที่ 6 — บันทึกข้อมูล (Log Data)',
-          7: 'ขั้นตอนที่ 7 — กรณีผิดปกติ (Fault Handling)'
-        };
-        el.autoFlowBadge.textContent = 'สถานะปัจจุบัน: ' + (stepNames[state.activeStep] || '');
-        el.autoFlowBadge.className = 'status-pill ' + (state.activeStep === 7 ? 'danger' : 'ok');
-
-        el.flowStepsContainer.querySelectorAll('.flow-step').forEach(function (card) {
-          const s = parseInt(card.getAttribute('data-step'), 10);
-          card.classList.toggle('active', s === state.activeStep && s !== 7);
-          card.classList.toggle('fault-active', s === 7 && state.activeStep === 7);
-        });
-      }
-
-      // Periodic 3-second Heartbeat & MicroSD / MQTT Telemetry Log (matching "Heartbeat: 3s" in diagram)
-      setInterval(function () {
-        state.heartbeatSec = 3;
-        el.heartbeatText.textContent = 'HB: ' + state.heartbeatSec + 's';
-        if (state.sdLogging) {
-          state.sdRecords += 1;
-        }
-        const prefix = (el.mqttTopicPrefix.value || 'esp32/sprayer01').trim();
-        const telemetryPacket = {
-          lat: +(state.baseLat - ((state.y - 195) / 10) * 0.000009).toFixed(4),
-          lon: +(state.baseLon + ((state.x - 150) / 10) * 0.000009).toFixed(4),
-          battPct: Math.round(state.batteryPct),
-          amp: state.currentAmp,
-          tankL: +state.tankLiters.toFixed(2),
-          flowLpm: +state.actualFlowLpm.toFixed(2),
-          bar: state.pressureBar,
-          kmh: +state.currentSpeedKmh.toFixed(1),
-          fault: state.faultMessage || 'OK'
-        };
-        if (state.simulation) {
-          appendLog('TELEM ' + prefix + '/telemetry', JSON.stringify(telemetryPacket));
-        }
-      }, 3000);
-
-      // Initial Seed Log
-      appendLog('BOOT ESP32', 'ESP32 Dual-Core 240MHz พร้อมทำงาน (โหมดจำลองข้อมูลเริ่มต้นตามภาพสถาปัตยกรรม)');
-      syncDriveButtons();
-      renderUI();
-      drawFieldMap();
-
-      // Main 10Hz Loop
-      let prevTime = performance.now();
-      function loop(now) {
-        const dt = Math.min(0.2, (now - prevTime) / 1000);
-        prevTime = now;
-        stepSimulation(dt);
-        renderUI();
-        drawFieldMap();
-        requestAnimationFrame(loop);
-      }
-      requestAnimationFrame(loop);
-    })();
+    window.addEventListener('DOMContentLoaded', () => {
+      resizeCanvases();
+      initRealMap();
+      updateDashboardUI();
+      requestAnimationFrame(animate);
+    });
   </script>
 </body>
 </html>
